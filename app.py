@@ -485,7 +485,7 @@ if User_validation():
                         
                     variables = {
                         "${FECHA}": fecha,
-                        "${MES}": Mes_espa(today.strftime("%m")),
+                        "${MES}": eleccion2,
                         "${AGENTES}": tx_empresas,
                         "${USUARIO}": usuario,
                         "${PRECIO_BOLSA}": P_bolsa,
