@@ -428,6 +428,9 @@ if User_validation():
                 
                 zf = zipfile.ZipFile(
                     "Resultado.zip", "w", zipfile.ZIP_DEFLATED)
+                my_bar=st.progress(0)
+                steps=len(Users)
+                steps_done=0
             
                 for usuario in Users:
                     
@@ -556,6 +559,10 @@ if User_validation():
                         
                         docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx", Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
                         zf.write(Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
+                    
+                    steps_done += 1    
+                    my_bar.progress(int(steps_done*100/steps))
+                        
                         
                 
                 
