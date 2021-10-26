@@ -505,6 +505,7 @@ if User_validation():
                         "${ENTER}": Enter,
                         "${MES_LIQUIDACION}": F_Liq_pag(int(today.strftime("%m"))+1,int(today.strftime("%Y"))),
                         "${MES_PAGO}":  F_Liq_pag(int(today.strftime("%m"))+2,int(today.strftime("%Y"))),
+                        "${INDICADOR}": eleccion3
                     }
                     
                     template_document = docx.Document(template_file_path)
