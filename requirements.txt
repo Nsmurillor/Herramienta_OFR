@@ -1,5 +1,6 @@
 streamlit
-docx==0.8.10
+python-docx==0.8.11
+docx2pdf
 pandas==1.1.5
 numpy==1.20.2
 matplotlib==3.2.2
