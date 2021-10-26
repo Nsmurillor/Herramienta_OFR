@@ -11,7 +11,7 @@ import json
 import glob
 from PIL import Image
 import smtplib
-
+import docx2pdf 
 import shutil
 import zipfile
 from datetime import datetime
@@ -54,7 +54,7 @@ def User_validation():
     
     if not bool_aprove:
         
-        colums= st.beta_columns([1,2,1])
+        colums= st.columns([1,2,1])
         
         with colums[1]:
             #st.image("Imagenes/Escudo_unal.png")
@@ -344,7 +344,7 @@ if User_validation():
         
         
         
-        colums= st.beta_columns([1,1,1])
+        colums= st.columns([1,1,1])
         with colums[0]:                
             uploaded_file_1 = st.file_uploader("Suba el consolidado base")
         with colums[1]:                
@@ -374,7 +374,7 @@ if User_validation():
             fecha=dia_esp(today.strftime("%d")) +" de "+ mes_espa(today.strftime("%m")) +" de "+ today.strftime("%Y")
             
         
-            colums= st.beta_columns([1,4,1])
+            colums= st.columns([1,4,1])
             with colums[1]:
                 
                 st.subheader("Introducción de las variables")
@@ -384,7 +384,7 @@ if User_validation():
                 P_TMR=st.text_input("Introduzca el valor de la TRM",value="3,950.00")
                 F_TRM = st.date_input("Seleccione la fecha del valor de la TRM:",value=today).strftime("%Y-%m-%d")
                 
-            columns_2 = st.beta_columns([1,2,2,1])
+            columns_2 = st.columns([1,2,2,1])
             
             Opciones2=("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
             Opciones3=("I","II","III","IV","V")
@@ -394,7 +394,7 @@ if User_validation():
             with columns_2[2]:
                 eleccion3=st.selectbox('Selecciona la semana de la OFR',Opciones3)
                 
-            columns_3 = st.beta_columns([2,1,2])
+            columns_3 = st.columns([2,1,2])
 
             with columns_3[1]:
                 b=st.checkbox("PDF")
@@ -423,7 +423,7 @@ if User_validation():
                            
                 os.makedirs(Ruta_word, exist_ok=True)
                 if b:
-                    import docx2pdf 
+                    
                     os.makedirs(Ruta_pdf, exist_ok=True)
                 
                 zf = zipfile.ZipFile(
