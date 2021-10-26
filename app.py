@@ -503,8 +503,8 @@ if User_validation():
                         "${NUM_DIAS}":Num_dias(len(Fechas)),
                         "${RANGO_FECHAS_1}": R_fechas,
                         "${ENTER}": Enter,
-                        "${MES_LIQUIDACION}": F_Liq_pag(int(today.strftime("%m"))+1,int(today.strftime("%Y"))),
-                        "${MES_PAGO}":  F_Liq_pag(int(today.strftime("%m"))+2,int(today.strftime("%Y"))),
+                        "${MES_LIQUIDACION}": F_Liq_pag(Opciones2.index(eleccion2)+1,int(today.strftime("%Y"))),
+                        "${MES_PAGO}":  F_Liq_pag(Opciones2.index(eleccion2)+2,int(today.strftime("%Y"))),
                         "${INDICADOR}": eleccion3
                     }
                     
