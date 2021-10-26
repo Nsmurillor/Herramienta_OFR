@@ -11,7 +11,7 @@ import json
 import glob
 from PIL import Image
 import smtplib
-import docx2pdf 
+
 import shutil
 import zipfile
 from datetime import datetime
@@ -423,6 +423,7 @@ if User_validation():
                            
                 os.makedirs(Ruta_word, exist_ok=True)
                 if b:
+                    import docx2pdf 
                     os.makedirs(Ruta_pdf, exist_ok=True)
                 
                 zf = zipfile.ZipFile(
@@ -552,6 +553,7 @@ if User_validation():
                     template_document.save(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx")
                     zf.write(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx")
                     if b:
+                        
                         docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx", Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
                         zf.write(Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
                         
