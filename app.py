@@ -578,7 +578,7 @@ if User_validation():
                     zf.write(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".doc")
                     if b:
                         result = convert_to(Ruta_word,  usuario+"_OFR_"+str(version)+".doc", timeout=15)
-                        docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".doc", Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
+                        # docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".doc", Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
                         zf.write(Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
                     
                     steps_done += 1    
