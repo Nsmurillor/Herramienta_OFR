@@ -15,7 +15,11 @@ import docx2pdf
 import shutil
 import zipfile
 from datetime import datetime
+import sys
+import subprocess
 
+
+    
 def User_validation():
     
     
@@ -264,7 +268,24 @@ def F_Liq_pag(mes,ano):
     else:
         Fecha += " "+ str(ano)
     return Fecha       
-    
+
+
+
+
+def convert_to(folder, source, timeout=None):
+    args = [libreoffice_exec(), '--headless', '--convert-to', 'pdf', '--outdir', folder, source]
+
+    process = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
+    filename = re.search('-> (.*?) using filter', process.stdout.decode())
+
+    return filename.group(1)
+
+
+def libreoffice_exec():
+    # TODO: Provide support for more platforms
+    if sys.platform == 'darwin':
+        return '/Applications/LibreOffice.app/Contents/MacOS/soffice'
+    return 'libreoffice'    
         
     
 def mes_espa(mes):
@@ -514,7 +535,6 @@ if User_validation():
     
                         for section in template_document.sections:
                             for paragraph in section.header.paragraphs:
-                                print(paragraph.text)
                                 replace_text_in_paragraph(paragraph, variable_key, variable_value)
     
                         for paragraph in template_document.paragraphs:
@@ -554,11 +574,11 @@ if User_validation():
                     
                     version=1
                 
-                    template_document.save(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx")
-                    zf.write(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx")
+                    template_document.save(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".doc")
+                    zf.write(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".doc")
                     if b:
-                        
-                        docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx", Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
+                        result = convert_to(Ruta_word,  usuario+"_OFR_"+str(version)+".doc", timeout=15)
+                        docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".doc", Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
                         zf.write(Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
                     
                     steps_done += 1    
@@ -571,13 +591,14 @@ if User_validation():
                 
                 
                 with open("Resultado.zip", "rb") as fp:
-                    btn = st.download_button(
-                        label="Descargar resultados",
-                        data=fp,
-                        file_name="Resultado.zip",
-                        mime="application/zip"
-                    )
-                
+                    with columns_3[1]:
+                        btn = st.download_button(
+                            label="Descargar resultados",
+                            data=fp,
+                            file_name="Resultado.zip",
+                            mime="application/zip"
+                        )
+                    
         else:
             st.warning("Necesita subir los tres archivos")   
         
