@@ -405,7 +405,7 @@ if User_validation():
                 a=st.button("Crear los documentos")
                 
             Ruta="Documentos/"+eleccion2 +"/"+ eleccion3
-            
+            Ruta_x="Documentos/"
         
             if a:
                 
@@ -558,13 +558,13 @@ if User_validation():
                     
                     version=1
                 
-                    template_document.save(Ruta_word+"/"+usuario+"_OFR"+".docx")
-                    zf.write(Ruta_word+"/"+usuario+"_OFR"+".docx")
+                    template_document.save(Ruta_x+usuario+"_OFR"+".docx")
+                    zf.write(Ruta_x+usuario+"_OFR"+".docx")
                     if b:
                         
-                        docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
-                        zf.write(Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
-                    File_names.extend([Ruta_word+"/"+usuario+"_OFR"+".docx"])
+                        docx2pdf.convert(Ruta_x+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
+                        zf.write(Ruta_x+usuario+"_OFR"+".pdf")
+                    File_names.extend([usuario+"_OFR"+".docx"])
                     
                     steps_done += 1    
                     my_bar.progress(int(steps_done*100/steps))
@@ -572,9 +572,9 @@ if User_validation():
                         
                 Info.update({"File_names":File_names})
                 json_info = json.dumps(Info, indent = 4)
-                with open(Ruta_word+'/data.json', 'w') as f:
+                with open(Ruta_x+'/00_data.json', 'w') as f:
                     json.dump(json_info, f)
-                zf.write(Ruta_word+'/data.json')    
+                zf.write(Ruta_x+'/00_data.json')    
                 zf.close()
                 
                 
