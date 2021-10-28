@@ -15,7 +15,7 @@ import docx2pdf
 import shutil
 import zipfile
 from datetime import datetime
-
+import platform
 def User_validation():
     
     
@@ -397,7 +397,11 @@ if User_validation():
             columns_3 = st.columns([2,1,2])
 
             with columns_3[1]:
-                b=st.checkbox("PDF")
+                if platform.system()=='Windows':
+                    b=st.checkbox("PDF")
+                else:
+                    st.write(os.name)
+                    b=False
                 a=st.button("Crear los documentos")
                 
             Ruta="Documentos/"+eleccion2 +"/"+ eleccion3
@@ -416,10 +420,11 @@ if User_validation():
                 Ruta_word=Ruta+"/Word"
                 Ruta_pdf=Ruta+"/PDF"    
                 
-                
+                Info ={"Ruta": Ruta, 
+                      "File_names": None
+                    } 
                    
-                # directory
-                
+                File_names=[]
                            
                 os.makedirs(Ruta_word, exist_ok=True)
                 if b:
@@ -553,19 +558,23 @@ if User_validation():
                     
                     version=1
                 
-                    template_document.save(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx")
-                    zf.write(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx")
+                    template_document.save(Ruta_word+"/"+usuario+"_OFR"+".docx")
+                    zf.write(Ruta_word+"/"+usuario+"_OFR"+".docx")
                     if b:
                         
-                        docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR_"+str(version)+".docx", Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
-                        zf.write(Ruta_pdf+"/"+usuario+"_OFR_"+str(version)+".pdf")
-                    
+                        docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
+                        zf.write(Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
+                    File_names.extend([Ruta_word+"/"+usuario+"_OFR"+".docx"])
+                    st.write(File_names)
                     steps_done += 1    
                     my_bar.progress(int(steps_done*100/steps))
                         
                         
-                
-                
+                Info.update({"File_names":File_names})
+                json_info = json.dumps(Info, indent = 4)
+                with open('data.json', 'w') as f:
+                    json.dump(json_info, f)
+                zf.write('data.json')    
                 zf.close()
                 
                 
