@@ -484,7 +484,7 @@ if User_validation():
                     I_NETO=Ingreso-C_comer-C_GMS
                     
                     if len(Data_frame_fechas.index.values)>13:
-                        Enter="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+                        Enter="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
                     else:
                         Enter=""
                         
