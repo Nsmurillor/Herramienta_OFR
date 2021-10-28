@@ -400,7 +400,7 @@ if User_validation():
                 if platform.system()=='Windows':
                     b=st.checkbox("PDF")
                 else:
-                    st.write(os.name)
+                    
                     b=False
                 a=st.button("Crear los documentos")
                 
@@ -565,16 +565,16 @@ if User_validation():
                         docx2pdf.convert(Ruta_word+"/"+usuario+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
                         zf.write(Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
                     File_names.extend([Ruta_word+"/"+usuario+"_OFR"+".docx"])
-                    st.write(File_names)
+                    
                     steps_done += 1    
                     my_bar.progress(int(steps_done*100/steps))
                         
                         
                 Info.update({"File_names":File_names})
                 json_info = json.dumps(Info, indent = 4)
-                with open('data.json', 'w') as f:
+                with open(Ruta_word+'/data.json', 'w') as f:
                     json.dump(json_info, f)
-                zf.write('data.json')    
+                zf.write(Ruta_word+'/data.json')    
                 zf.close()
                 
                 
