@@ -484,7 +484,7 @@ if User_validation():
                     I_NETO=Ingreso-C_comer-C_GMS
                     
                     if len(Data_frame_fechas.index.values)>13:
-                        Enter="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+                        Enter="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
                     else:
                         Enter=""
                         
@@ -508,8 +508,8 @@ if User_validation():
                         "${NUM_DIAS}":Num_dias(len(Fechas)),
                         "${RANGO_FECHAS_1}": R_fechas,
                         "${ENTER}": Enter,
-                        "${MES_LIQUIDACION}": F_Liq_pag(Opciones2.index(eleccion2)+1,int(today.strftime("%Y"))),
-                        "${MES_PAGO}":  F_Liq_pag(Opciones2.index(eleccion2)+2,int(today.strftime("%Y"))),
+                        "${MES_LIQUIDACION}": F_Liq_pag(Opciones2.index(eleccion2)+2,int(today.strftime("%Y"))),
+                        "${MES_PAGO}":  F_Liq_pag(Opciones2.index(eleccion2)+3,int(today.strftime("%Y"))),
                         "${INDICADOR}": eleccion3
                     }
                     
