@@ -180,13 +180,18 @@ def Range_fecha(dates):
 
         
     
-def dt_fechas(data,data_user,Fechas):
+def dt_fechas(data,data_user,Fechas,tipo_dia):
     dt_Final=pd.DataFrame(columns=["Dia","Fecha","Requerimiento","Respaldo"])
     for dia in Fechas:
         data_fecha=data_user[data_user["Fecha"]== dia]
         data_dia_todos=data[data["Fecha"]==dia]
-        d_week=pd.Series(data=dia).dt.dayofweek.to_numpy()[0]
-        df=pd.DataFrame([[day_week(d_week),dia,data_dia_todos["CANTIDAD"].sum(),data_fecha["CANTIDAD"].sum()]],columns=["Dia","Fecha","Requerimiento","Respaldo"])
+        try:
+            d_week=tipo_dia[Tipo_dia["FECHA"]==dia]["TIPO D"].to_numpy()[0]
+        except:
+            st.warning("Actualizar el calendario del excel extra")
+            d_week=day_week(pd.Series(data=dia).dt.dayofweek.to_numpy()[0])
+        
+        df=pd.DataFrame([[d_week,dia,data_dia_todos["CANTIDAD"].sum(),data_fecha["CANTIDAD"].sum()]],columns=["Dia","Fecha","Requerimiento","Respaldo"])
         dt_Final=dt_Final.append(df, ignore_index=True)
     
     return dt_Final
@@ -367,7 +372,7 @@ if User_validation():
         
             
             Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
-            
+            Tipo_dia=pd.read_excel(uploaded_file_3,sheet_name="Calendario")
             template_file_path = uploaded_file_2
             
             today =  date.today()
@@ -440,7 +445,7 @@ if User_validation():
                 for usuario in Users:
                     
                     data_user=data.copy()
-                    data_user=data_user[data_user["USUARIO"]== usuario] 
+                    data_user=data_user[data_user["USUARIO"]==usuario] 
                     Empresas = pd.unique(data_user["agente1"])
                     
                     Respaldo = data[data["USUARIO"]== usuario]["CANTIDAD"].sum()
@@ -448,7 +453,7 @@ if User_validation():
                 
                     R_fechas = Range_fecha(Fechas)
                     
-                    Data_frame_fechas=dt_fechas(data.copy(),data_user,Fechas)
+                    Data_frame_fechas=dt_fechas(data.copy(),data_user,Fechas,Tipo_dia)
                     
                     
                     try:
