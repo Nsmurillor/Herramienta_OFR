@@ -2,6 +2,7 @@ import docx
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import os
+
 import pandas as pd
 import numpy as np
 import re
@@ -195,7 +196,22 @@ def dt_fechas(data,data_user,Fechas,tipo_dia):
         dt_Final=dt_Final.append(df, ignore_index=True)
     
     return dt_Final
+    
+def dt_fechas_2(data,data_user,Fechas,tipo_dia):
+    dt_Final=pd.DataFrame(columns=["Dia","Fecha","Requerimiento","Respaldo"])
+    for dia in Fechas:
+        data_fecha=data_user[data_user["FECHA"]== dia]
+        data_dia_todos=data[data["FECHA"]==dia]
+        try:
+            d_week=tipo_dia[Tipo_dia["FECHA"]==dia]["TIPO D"].to_numpy()[0]
+        except:
+            st.warning("Actualizar el calendario del excel extra")
+            d_week=day_week(pd.Series(data=dia).dt.dayofweek.to_numpy()[0])
         
+        df=pd.DataFrame([[d_week,dia,data_dia_todos["CANTIDAD"].sum(),data_fecha["CANTIDAD"].sum()]],columns=["Dia","Fecha","Requerimiento","Respaldo"])
+        dt_Final=dt_Final.append(df, ignore_index=True)
+    
+    return dt_Final
 
 def Mes_espa(mes):
     
@@ -346,6 +362,7 @@ if User_validation():
     
     
     if eleccion==Opciones1[0]:
+    # if False:
         
         
         
@@ -409,8 +426,16 @@ if User_validation():
                     b=False
                 a=st.button("Crear los documentos")
                 
-            Ruta="Documentos/"+eleccion2 +"/"+ eleccion3
-            Ruta_x="Documentos/"
+            Ruta="Documentos/OFR/"+str(today.year)+"/"+eleccion2 +"/"+ eleccion3
+            Ruta_x="Documentos_exportar/"
+            
+            if os.path.exists(Ruta_x):
+            
+                shutil.rmtree(Ruta_x)
+                Ruta_x=Ruta_x+"/"
+            Ruta_x=Ruta_x+"/"
+            os.makedirs(Ruta_x, exist_ok=True)
+            
         
             if a:
                 
@@ -594,8 +619,8 @@ if User_validation():
                     
         else:
             st.warning("Necesita subir los tres archivos")   
-    if True:
-    #elif eleccion==Opciones1[1]:
+    #else:
+    elif eleccion==Opciones1[1]:
         if False:
             colums= st.columns([1,1,1])
             with colums[0]:                
@@ -626,7 +651,7 @@ if User_validation():
                 Users=pd.unique(data["USUARIO"])
             
             Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
-            
+            Tipo_dia=pd.read_excel(uploaded_file_3,sheet_name="Calendario")
             template_file_path = uploaded_file_2
             
             today =  date.today()
@@ -646,12 +671,13 @@ if User_validation():
             columns_2 = st.columns([1,2,2,1])
             
             Opciones2=("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
-            Opciones3=("I","II","III","IV","V")
             
             with columns_2[1]:
-                eleccion2=st.selectbox('Seleccione el mes de la OFR',Opciones2)
+                eleccion3=st.number_input('Seleccione el año del cerficado',value=today.year)
             with columns_2[2]:
-                eleccion3=st.selectbox('Selecciona la semana de la OFR',Opciones3)
+                eleccion2=st.selectbox('Seleccione el mes del cerficado',Opciones2)
+            
+            
                 
             columns_3 = st.columns([2,1,2])
 
@@ -663,12 +689,209 @@ if User_validation():
                     b=False
                 a=st.button("Crear los documentos")
                 
-            Ruta="Documentos/"+eleccion2 +"/"+ eleccion3
-            Ruta_x="Documentos/"
+            Ruta="Documentos/Certificados/"+str(eleccion3) +"/"+ eleccion2
+            Ruta_x="Documentos_exportar"
+            if os.path.exists(Ruta_x):
+                shutil.rmtree(Ruta_x)
+                
+                Ruta_x=Ruta_x+"/"
+            Ruta_x=Ruta_x+"/"
+            os.makedirs(Ruta_x, exist_ok=True)
+         
+            if a:
+                try:
+                    path1 = os.path.join(Ruta)
+                    shutil.rmtree(path1)
+                    os.makedirs(Ruta, exist_ok=True)
+                except:
+                    os.makedirs(Ruta, exist_ok=True)
+                
+                
+                Ruta_word=Ruta+"/Word"
+                Ruta_pdf=Ruta+"/PDF"    
+                
+                Info ={"Ruta": Ruta, 
+                      "File_names": None
+                    } 
+                   
+                File_names=[]
+                           
+                os.makedirs(Ruta_word, exist_ok=True)
+                if b:
+                    
+                    os.makedirs(Ruta_pdf, exist_ok=True)
+                
+                    
+                os.makedirs(Ruta_word, exist_ok=True)
+                if b:
+                    
+                    os.makedirs(Ruta_pdf, exist_ok=True)
+                
+                zf = zipfile.ZipFile(
+                    "Resultado.zip", "w", zipfile.ZIP_DEFLATED)
+                my_bar=st.progress(0)
+                steps=len(Users)
+                steps_done=0
+            
+                for usuario in Users:
+                    
+                    data_user=data.copy()
+                    data_user=data_user[data_user["USUARIO"]==usuario] 
+                    Empresas = pd.unique(data_user["COMPRADOR"])
+                    
+                    Respaldo = data[data["USUARIO"]== usuario]["CANTIDAD"].sum()
+                    Fechas = pd.unique(data_user["FECHA"])
+                
+                    R_fechas = Range_fecha(Fechas)
+                    
+                    Data_frame_fechas=dt_fechas_2(data.copy(),data_user,Fechas,Tipo_dia)
+                    
+                    
+                    try:
+                        Email = str(Extras[Extras["USUARIO"] == usuario]["CORREO"].values)
+                        Porc_come = Extras[Extras["USUARIO"] == usuario]["MARGEN"].values[0]
+                    except:
+    
+                        Email = ""
+                        Porc_come = 0.1
+                        st.warning("No hay coincidencia en el Excel de usuarios para: "+usuario)   
+                        
+                    Email = re.sub("\[|\]|\'|0","",Email)
+                    
+                    
+                    tx_empresas=""
+                    for idx ,val in enumerate(Empresas):
+                        
+                        if len(Empresas)<4:
+                            val_2=val[0:3]
+                            tx_empresas += val_2
+                            if idx==len(Empresas)-1:
+                                pass
+                            else:
+                                tx_empresas +=", "
+                            
+                        else:
+                            tx_empresas += "Los Generadores"
+                        
+                    P_kwh=float(re.sub(",","",P_TMR))*float(P_contrato)/1000
+                    Ingreso=int(P_kwh*Respaldo)
+                    C_comer=int(Ingreso*Porc_come)
+                    C_GMS=int(Ingreso*4/1000)
+                    I_NETO=Ingreso-C_comer-C_GMS
+                    
+                    if len(Data_frame_fechas.index.values)>13:
+                        Enter="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+                    else:
+                        Enter=""
+                    
+                    REQ_MAXIMO=Data_frame_fechas["Respaldo"].max()
+                    
+                    variables = {
+                        "${FECHA}": fecha,
+                        "${MES}": eleccion2,
+                        "${ANO}": today.strftime("%Y"),
+                        "${AGENTES}": tx_empresas,
+                        "${USUARIO}": usuario,
+                        "${OFERTA_MAX}": f'{REQ_MAXIMO:,}',
+                        "${PRECIO_CONTRATO}": P_contrato,
+                        "${FECHA_TRM}": F_TRM,
+                        "${P_TRM}": P_TMR,
+                        "${EMAIL_USUARIO}": Email,
+                        "${PRECIO_PKWH}":str(round(P_kwh,2)),
+                        "${PORC_COMER}":str(int(Porc_come*100))+"%",
+                        "${RESPALDO_TOT}":f'{Respaldo:,}',
+                        "${INGRESO}":f'{Ingreso:,}',
+                        "${COST_COME}":f'{C_comer:,}',
+                        "${COST_GMS}":f'{C_GMS:,}',
+                        "${INGRESO_NETO}": f'{I_NETO:,}',
+                        "${NUM_DIAS}":Num_dias(len(Fechas)),
+                        "${RANGO_FECHAS_1}": R_fechas,
+                        "${ENTER}": Enter,
+                        "${MES_LIQUIDACION}": F_Liq_pag(Opciones2.index(eleccion2)+2,int(today.strftime("%Y"))),
+                        "${MES_PAGO}":  F_Liq_pag(Opciones2.index(eleccion2)+3,int(today.strftime("%Y"))),
+                        "${INDICADOR}": eleccion3
+                    }
+                    
+                    template_document = docx.Document(template_file_path)
+                    
+                    for variable_key, variable_value in variables.items():
+    
+                        for section in template_document.sections:
+                            for paragraph in section.header.paragraphs:
+                                replace_text_in_paragraph(paragraph, variable_key, variable_value)
+    
+                        for paragraph in template_document.paragraphs:
+                    
+                            replace_text_in_paragraph(paragraph, variable_key, variable_value)
+                
+                        for table in template_document.tables:
+                            for col in table.columns:
+                                for cell in col.cells:
+                                    for paragraph in cell.paragraphs:
+                                        replace_text_in_paragraph(paragraph, variable_key, variable_value)
+                    
+                    rows = template_document.tables[1].rows
+                    index_1=Data_frame_fechas.index.values
+                    Acum_Req=0
+                    Acum_Res=0
+                    # for idx in index_1:
+    
+                        
+                    #     rows[int(idx)+1].cells[0].text = Data_frame_fechas.iloc[idx]["Dia"]
+                        
+                    #     rows[int(idx)+1].cells[1].text = Data_frame_fechas.iloc[idx]["Fecha"].strftime('%Y-%m-%d')
+                        
+                    #     rows[int(idx)+1].cells[2].text = f'{Data_frame_fechas.iloc[idx]["Requerimiento"]:,}'
+                    #     Acum_Req += Data_frame_fechas.iloc[idx]["Requerimiento"]
+                    #     rows[int(idx)+1].cells[3].text = f'{Data_frame_fechas.iloc[idx]["Respaldo"]:,}'
+                    #     Acum_Res += Data_frame_fechas.iloc[idx]["Respaldo"]
+                        
+                        
+                    # for idx in np.arange(len(index_1)+1,37):
+                        
+                    #     remove_row(template_document.tables[1], rows[len(index_1)+1])    
+                        
+                    # rows[-1].cells[1].text = Num_dias(len(Fechas))
+                    # rows[-1].cells[2].text = f'{Acum_Req:,}'
+                    # rows[-1].cells[3].text = f'{Acum_Res:,}'
+                    
+                    # version=1
+                
+                    template_document.save(Ruta_x+usuario+"_OFR"+".docx")
+                    zf.write(Ruta_x+usuario+"_OFR"+".docx")
+                    if b:
+                        
+                        docx2pdf.convert(Ruta_x+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
+                        zf.write(Ruta_x+usuario+"_OFR"+".pdf")
+                    File_names.extend([usuario+"_OFR"+".docx"])
+                    
+                    steps_done += 1    
+                    my_bar.progress(int(steps_done*100/steps))
+                        
+                        
+                Info.update({"File_names":File_names})
+                json_info = json.dumps(Info, indent = 4)
+                with open(Ruta_x+'/00_data.json', 'w') as f:
+                    json.dump(json_info, f)
+                zf.write(Ruta_x+'/00_data.json')    
+                zf.close()
+                
+                
+                with open("Resultado.zip", "rb") as fp:
+                    with columns_3[1]:
+                        btn = st.download_button(
+                            label="Descargar resultados",
+                            data=fp,
+                            file_name="Resultado.zip",
+                            mime="application/zip"
+                        )
+                
+        else:
+            st.warning("Necesita subir los tres archivos")   
+    
         
-            
-            
         
-            
+    
+        
           
    
