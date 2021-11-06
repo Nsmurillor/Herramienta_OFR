@@ -589,7 +589,77 @@ if User_validation():
                     
         else:
             st.warning("Necesita subir los tres archivos")   
+    if True:
+    #elif eleccion==Opciones1[1]:
+        if False:
+            colums= st.columns([1,1,1])
+            with colums[0]:                
+                uploaded_file_1 = st.file_uploader("Suba el documento de liquidación")
+            with colums[1]:                
+                uploaded_file_2 = st.file_uploader("Suba la plantilla del documento")
+            with colums[2]:                
+                uploaded_file_3 = st.file_uploader("Suba el excel adicional")
+            if (uploaded_file_1 is not None) and (uploaded_file_2 is not None) and (uploaded_file_3 is not None):
+                st.write("Hello bietches")
+        else:
+            uploaded_file_1="Liquidacion_base.xlsm"
+            uploaded_file_2="Certificado_base.docx"
+            uploaded_file_3="Excel_extra.xls"
+            
+        if (uploaded_file_1 is not None) and (uploaded_file_2 is not None) and (uploaded_file_3 is not None):
+                    
+            data=pd.read_excel(uploaded_file_1)
+            data["FECHA"]=data["FECHA"].dt.to_pydatetime()
+            
+            
+            
+            if data["USUARIO"].isnull().values.any():
+                st.warning("Revisar archivo de consolidado base, usuario no encontrado.")   
+                data.dropna(subset = ["USUARIO"], inplace=True)
+                Users=pd.unique(data["USUARIO"])
+            else:
+                Users=pd.unique(data["USUARIO"])
+            
+            Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
+            
+            template_file_path = uploaded_file_2
+            
+            today =  date.today()
+            fecha=dia_esp(today.strftime("%d")) +" de "+ mes_espa(today.strftime("%m")) +" de "+ today.strftime("%Y")
+            
         
+            colums= st.columns([1,4,1])
+            with colums[1]:
+                
+                st.subheader("Introducción de las variables")
+                
+                P_bolsa=st.text_input("Introduzca el Precio de Escasez de Activación",value="10.00")
+                P_contrato=st.text_input("Introduzca el precio del contrato [USD]",value="10.00")
+                P_TMR=st.text_input("Introduzca el valor de la TRM",value="3,950.00")
+                F_TRM = st.date_input("Seleccione la fecha del valor de la TRM:",value=today).strftime("%Y-%m-%d")
+                
+            columns_2 = st.columns([1,2,2,1])
+            
+            Opciones2=("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
+            Opciones3=("I","II","III","IV","V")
+            
+            with columns_2[1]:
+                eleccion2=st.selectbox('Seleccione el mes de la OFR',Opciones2)
+            with columns_2[2]:
+                eleccion3=st.selectbox('Selecciona la semana de la OFR',Opciones3)
+                
+            columns_3 = st.columns([2,1,2])
+
+            with columns_3[1]:
+                if platform.system()=='Windows':
+                    b=st.checkbox("PDF")
+                else:
+                    
+                    b=False
+                a=st.button("Crear los documentos")
+                
+            Ruta="Documentos/"+eleccion2 +"/"+ eleccion3
+            Ruta_x="Documentos/"
         
             
             
