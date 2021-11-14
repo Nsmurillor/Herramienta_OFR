@@ -63,7 +63,7 @@ def User_validation():
             Usuario=st.text_input("Usuario")
             Clave=st.text_input("Contraseña",type="password")
             
-        Users=["Juan Pablo"]
+        Users=["Gestor Comercial"]
         bool_user = Usuario in Users
         bool_clave = (Clave)==("1234")
     
@@ -317,6 +317,36 @@ def mes_espa(mes):
     
     
     return Mes
+    
+def mes_num(mes):
+    Opciones2=("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
+    if mes == Opciones2[0]:
+        Mes="01"
+    elif mes == Opciones2[1]:
+        Mes="02"
+    elif mes == Opciones2[2]:
+        Mes="03"
+    elif mes == Opciones2[3]:
+        Mes="04"
+    elif mes == Opciones2[4]:
+        Mes="05"
+    elif mes == Opciones2[5]:
+        Mes="06"
+    elif mes == Opciones2[6]:
+        Mes="07"
+    elif mes == Opciones2[7]:
+        Mes="08"
+    elif mes == Opciones2[8]:
+        Mes="09"
+    elif mes == Opciones2[9]:
+        Mes="10"
+    elif mes == Opciones2[10]:
+        Mes="11"
+    elif mes == Opciones2[11]:
+        Mes="12"
+    
+    
+    return Mes
 
 def dia_esp(dia):
     
@@ -353,17 +383,23 @@ def replace_text_in_paragraph(paragraph, key, value):
             if key in item.text:
                 item.text = item.text.replace(key, value)
               
-
+st.set_page_config(
+	layout="centered",  # Can be "centered" or "wide". In the future also "dashboard", etc.
+	initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
+	page_title="JULIA RD",  # String or None. Strings get appended with "• Streamlit". 
+	page_icon="📊",  # String, anything supported by st.image, or None.
+)
 if User_validation():
     
     
-    Opciones1=("Proyecto 1","Proyecto 2","Proyecto 3")
+    Opciones1=("Oferta Libre de Respaldo","Certificado de reintegros","Proyecto 3")
     eleccion=st.sidebar.selectbox('Seleccione el proyecto',Opciones1)
     
     
     if eleccion==Opciones1[0]:
-    # if False:
-        
+    #if False:
+        st.header("Creación ofertas libres de respaldo")
+        st.subheader("Introducción de los documentos")
         
         
         colums= st.columns([1,1,1])
@@ -374,7 +410,7 @@ if User_validation():
         with colums[2]:                
             uploaded_file_3 = st.file_uploader("Suba el excel adicional")
         if (uploaded_file_1 is not None) and (uploaded_file_2 is not None) and (uploaded_file_3 is not None):
-                    
+                 
             data=pd.read_excel(uploaded_file_1)
             data["Fecha"]=data["FECHAINI"].dt.to_pydatetime()
             
@@ -426,7 +462,7 @@ if User_validation():
                     b=False
                 a=st.button("Crear los documentos")
                 
-            Ruta="Documentos/OFR/"+str(today.year)+"/"+eleccion2 +"/"+ eleccion3
+            Ruta="Documentos/OFR/"+str(today.year)+"/"+mes_num(eleccion2)+"-"+eleccion2 +"/"+ eleccion3
             Ruta_x="Documentos_exportar/"
             
             if os.path.exists(Ruta_x):
@@ -577,6 +613,11 @@ if User_validation():
                         rows[int(idx)+1].cells[3].text = f'{Data_frame_fechas.iloc[idx]["Respaldo"]:,}'
                         Acum_Res += Data_frame_fechas.iloc[idx]["Respaldo"]
                         
+                        for idx_2 in range(0,4):
+                            run=rows[int(idx)+1].cells[idx_2].paragraphs[0].runs
+                            font = run[0].font
+                            font.size= Pt(10)
+                            font.name = 'Tahoma'
                         
                     for idx in np.arange(len(index_1)+1,37):
                         
@@ -621,7 +662,9 @@ if User_validation():
             st.warning("Necesita subir los tres archivos")   
     #else:
     elif eleccion==Opciones1[1]:
-        if False:
+        st.header("Creación certificados de reingresos")
+        st.subheader("Introducción de los documentos")
+        if True:
             colums= st.columns([1,1,1])
             with colums[0]:                
                 uploaded_file_1 = st.file_uploader("Suba el documento de liquidación")
@@ -629,15 +672,15 @@ if User_validation():
                 uploaded_file_2 = st.file_uploader("Suba la plantilla del documento")
             with colums[2]:                
                 uploaded_file_3 = st.file_uploader("Suba el excel adicional")
-            if (uploaded_file_1 is not None) and (uploaded_file_2 is not None) and (uploaded_file_3 is not None):
-                st.write("Hello bietches")
+            
+                
         else:
             uploaded_file_1="Liquidacion_base.xlsm"
             uploaded_file_2="Certificado_base.docx"
-            uploaded_file_3="Excel_extra.xls"
+            uploaded_file_3="Excel_extra_certificados.xls"
             
         if (uploaded_file_1 is not None) and (uploaded_file_2 is not None) and (uploaded_file_3 is not None):
-                    
+                     
             data=pd.read_excel(uploaded_file_1)
             data["FECHA"]=data["FECHA"].dt.to_pydatetime()
             
@@ -652,22 +695,21 @@ if User_validation():
             
             Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
             Tipo_dia=pd.read_excel(uploaded_file_3,sheet_name="Calendario")
+            Agentes=pd.read_excel(uploaded_file_3,sheet_name="Agentes")
             template_file_path = uploaded_file_2
             
             today =  date.today()
             fecha=dia_esp(today.strftime("%d")) +" de "+ mes_espa(today.strftime("%m")) +" de "+ today.strftime("%Y")
             
-        
+            
             colums= st.columns([1,4,1])
             with colums[1]:
                 
                 st.subheader("Introducción de las variables")
                 
-                P_bolsa=st.text_input("Introduzca el Precio de Escasez de Activación",value="10.00")
-                P_contrato=st.text_input("Introduzca el precio del contrato [USD]",value="10.00")
-                P_TMR=st.text_input("Introduzca el valor de la TRM",value="3,950.00")
                 F_TRM = st.date_input("Seleccione la fecha del valor de la TRM:",value=today).strftime("%Y-%m-%d")
                 
+            P_TMR=str(round(data["TRM"].mean(),2))
             columns_2 = st.columns([1,2,2,1])
             
             Opciones2=("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
@@ -689,7 +731,7 @@ if User_validation():
                     b=False
                 a=st.button("Crear los documentos")
                 
-            Ruta="Documentos/Certificados/"+str(eleccion3) +"/"+ eleccion2
+            Ruta="Documentos/Certificados/"+str(eleccion3) +"/"+ mes_num(eleccion2)+"-"+eleccion2 
             Ruta_x="Documentos_exportar"
             if os.path.exists(Ruta_x):
                 shutil.rmtree(Ruta_x)
@@ -697,7 +739,7 @@ if User_validation():
                 Ruta_x=Ruta_x+"/"
             Ruta_x=Ruta_x+"/"
             os.makedirs(Ruta_x, exist_ok=True)
-         
+            
             if a:
                 try:
                     path1 = os.path.join(Ruta)
@@ -773,11 +815,8 @@ if User_validation():
                         else:
                             tx_empresas += "Los Generadores"
                         
-                    P_kwh=float(re.sub(",","",P_TMR))*float(P_contrato)/1000
-                    Ingreso=int(P_kwh*Respaldo)
-                    C_comer=int(Ingreso*Porc_come)
-                    C_GMS=int(Ingreso*4/1000)
-                    I_NETO=Ingreso-C_comer-C_GMS
+                    
+                    
                     
                     if len(Data_frame_fechas.index.values)>13:
                         Enter="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
@@ -786,24 +825,20 @@ if User_validation():
                     
                     REQ_MAXIMO=Data_frame_fechas["Respaldo"].max()
                     
+                    Valor_total=int(round(data_user["P NETO"].sum()))
+                    
                     variables = {
                         "${FECHA}": fecha,
                         "${MES}": eleccion2,
-                        "${ANO}": today.strftime("%Y"),
+                        "${ANO}": str(eleccion3),
                         "${AGENTES}": tx_empresas,
                         "${USUARIO}": usuario,
                         "${OFERTA_MAX}": f'{REQ_MAXIMO:,}',
-                        "${PRECIO_CONTRATO}": P_contrato,
                         "${FECHA_TRM}": F_TRM,
                         "${P_TRM}": P_TMR,
                         "${EMAIL_USUARIO}": Email,
-                        "${PRECIO_PKWH}":str(round(P_kwh,2)),
                         "${PORC_COMER}":str(int(Porc_come*100))+"%",
-                        "${RESPALDO_TOT}":f'{Respaldo:,}',
-                        "${INGRESO}":f'{Ingreso:,}',
-                        "${COST_COME}":f'{C_comer:,}',
-                        "${COST_GMS}":f'{C_GMS:,}',
-                        "${INGRESO_NETO}": f'{I_NETO:,}',
+                        "${RESPALDO_TOT}":"$ "+f'{Valor_total:,}',
                         "${NUM_DIAS}":Num_dias(len(Fechas)),
                         "${RANGO_FECHAS_1}": R_fechas,
                         "${ENTER}": Enter,
@@ -818,6 +853,7 @@ if User_validation():
     
                         for section in template_document.sections:
                             for paragraph in section.header.paragraphs:
+                                
                                 replace_text_in_paragraph(paragraph, variable_key, variable_value)
     
                         for paragraph in template_document.paragraphs:
@@ -830,40 +866,133 @@ if User_validation():
                                     for paragraph in cell.paragraphs:
                                         replace_text_in_paragraph(paragraph, variable_key, variable_value)
                     
+                    
+                    
+                    
+                     
                     rows = template_document.tables[1].rows
+                    index_1=Agentes.index.values
+                    Total_ingreso=0
+                    Total_respaldo=0
+                    
+                    dt_participa=pd.DataFrame(columns=["OFR","INGRESO","FILA_1","FILA_2"])
+                    
+                    for idx in index_1:
+                        run=rows[int(idx)+3].cells[0].paragraphs[0]
+                        rows[int(idx)+3].cells[0].text = "Precio "+Agentes.iloc[idx]["AGENTE"]
+                        rows[int(idx)+3].cells[1].text = f'{Agentes.iloc[idx]["PRECIO"]:,}'
+                        rows[int(idx)+3].cells[2].text = f'{round(float(re.sub(",","",P_TMR))*Agentes.iloc[idx]["PRECIO"]/1000,2):,}'
+                        
+                        Respaldo=data_user[data_user["OFR"]==Agentes.iloc[idx]["OFR"]]["CANTIDAD"].sum()
+                        
+                        rows[int(idx)+13].cells[0].text = "Respaldo "+Agentes.iloc[idx]["AGENTE"]
+                        rows[int(idx)+13].cells[1].text = "kWh"
+                        rows[int(idx)+13].cells[2].text = f'{Respaldo:,}'
+                        
+                        
+                        for idx_2 in range(0,3):
+                            run=rows[int(idx)+3].cells[idx_2].paragraphs[0].runs
+                            font = run[0].font
+                            font.size= Pt(10)
+                            font.name = 'Tahoma'
+                        
+                        for idx_2 in range(0,3):
+                            run=rows[int(idx)+13].cells[idx_2].paragraphs[0].runs
+                            font = run[0].font
+                            font.size= Pt(10)
+                            font.name = 'Tahoma'
+                            if idx_2==0:
+                                    
+                                font.bold= True
+                        
+                        Total_respaldo += Respaldo
+                        
+                        df=pd.DataFrame([[Agentes.iloc[idx]["OFR"],Respaldo,int(idx)+3,int(idx)+13]],columns=["OFR","INGRESO","FILA_1","FILA_2"])
+                        dt_participa=dt_participa.append(df, ignore_index=True)
+                        
+                        Total_ingreso += Respaldo*float(re.sub(",","",P_TMR))*Agentes.iloc[idx]["PRECIO"]/1000
+                   
+                        
+                   
+                    
+                    filas=[18,20,21,22,24]
+                    valores=[Total_respaldo,
+                             Total_ingreso,
+                             Total_ingreso*Porc_come,
+                             Total_ingreso*0.004,
+                             Valor_total]
+                     
+                    for idx, val in enumerate(filas):
+                        rows[val].cells[2].text = f'{int(round(valores[idx])):,}'
+                        run=rows[val].cells[2].paragraphs[0].runs
+                        font = run[0].font
+                        font.size= Pt(10)
+                        font.name = 'Tahoma'
+                  
+                    
+                    
+                    contador1=0   
+                    contador2=0  
+                    for idx in list(dt_participa.index):
+                        if dt_participa.iloc[idx]["INGRESO"]==0:
+                            remove_row(template_document.tables[1], rows[dt_participa.iloc[idx]["FILA_1"]+contador1])    
+                            contador1 -= 1
+                            remove_row(template_document.tables[1], rows[dt_participa.iloc[idx]["FILA_2"]+contador1+contador2])  
+                            contador2 -= 1
+                
+                    
+                    
+                    
+                    
+                    
+                    
+                    rows = template_document.tables[2].rows
                     index_1=Data_frame_fechas.index.values
                     Acum_Req=0
                     Acum_Res=0
-                    # for idx in index_1:
+                    for idx in index_1:
     
+                        rows[int(idx)+1].cells[0].text = Data_frame_fechas.iloc[idx]["Fecha"].strftime('%Y-%m-%d')
                         
-                    #     rows[int(idx)+1].cells[0].text = Data_frame_fechas.iloc[idx]["Dia"]
-                        
-                    #     rows[int(idx)+1].cells[1].text = Data_frame_fechas.iloc[idx]["Fecha"].strftime('%Y-%m-%d')
-                        
-                    #     rows[int(idx)+1].cells[2].text = f'{Data_frame_fechas.iloc[idx]["Requerimiento"]:,}'
-                    #     Acum_Req += Data_frame_fechas.iloc[idx]["Requerimiento"]
-                    #     rows[int(idx)+1].cells[3].text = f'{Data_frame_fechas.iloc[idx]["Respaldo"]:,}'
-                    #     Acum_Res += Data_frame_fechas.iloc[idx]["Respaldo"]
+                        rows[int(idx)+1].cells[1].text = Data_frame_fechas.iloc[idx]["Dia"]
                         
                         
-                    # for idx in np.arange(len(index_1)+1,37):
+                        rows[int(idx)+1].cells[2].text = f'{Data_frame_fechas.iloc[idx]["Requerimiento"]:,}'
+                        Acum_Req += Data_frame_fechas.iloc[idx]["Requerimiento"]
+                        rows[int(idx)+1].cells[3].text = f'{Data_frame_fechas.iloc[idx]["Respaldo"]:,}'
+                        Acum_Res += Data_frame_fechas.iloc[idx]["Respaldo"]
                         
-                    #     remove_row(template_document.tables[1], rows[len(index_1)+1])    
+                        for idx_2 in range(0,4):
+                            run=rows[int(idx)+1].cells[idx_2].paragraphs[0].runs
+                            font = run[0].font
+                            font.size= Pt(10)
+                            font.name = 'Tahoma'
                         
-                    # rows[-1].cells[1].text = Num_dias(len(Fechas))
-                    # rows[-1].cells[2].text = f'{Acum_Req:,}'
-                    # rows[-1].cells[3].text = f'{Acum_Res:,}'
+                        
+                    for idx in np.arange(len(index_1)+1,37):
+                        
+                        remove_row(template_document.tables[2], rows[len(index_1)+1])    
+                        
+                    #rows[-1].cells[1].text = Num_dias(len(Fechas))
+                    rows[-1].cells[2].text = f'{Acum_Req:,}'
+                    rows[-1].cells[3].text = f'{Acum_Res:,}'
+                    
+                    for idx_2 in range(1,4):
+                        run=rows[-1].cells[idx_2].paragraphs[0].runs
+                        font = run[0].font
+                        font.size= Pt(10)
+                        font.name = 'Tahoma'
                     
                     # version=1
-                
-                    template_document.save(Ruta_x+usuario+"_OFR"+".docx")
-                    zf.write(Ruta_x+usuario+"_OFR"+".docx")
+                    name_word="Certificado_Reintegros_"+usuario+"_"+eleccion2+".docx"
+                    name_pdf="Certificado_Reintegros_"+usuario+"_"+eleccion2+".pdf"
+                    template_document.save(Ruta_x+name_word)
+                    zf.write(Ruta_x+name_word)
                     if b:
                         
-                        docx2pdf.convert(Ruta_x+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
-                        zf.write(Ruta_x+usuario+"_OFR"+".pdf")
-                    File_names.extend([usuario+"_OFR"+".docx"])
+                        docx2pdf.convert(Ruta_x+name_word, Ruta_x+name_pdf)
+                        zf.write(Ruta_x+name_pdf)
+                    File_names.extend([name_word])
                     
                     steps_done += 1    
                     my_bar.progress(int(steps_done*100/steps))
