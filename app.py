@@ -666,7 +666,7 @@ if User_validation():
             st.warning("Necesita subir los tres archivos")   
     #else:
     elif eleccion==Opciones1[1]:
-        st.header("Creación certificados de reingresos")
+        st.header("Creación certificados de reintegros")
         st.subheader("Introducción de los documentos")
         if True:
             colums= st.columns([1,1,1])
