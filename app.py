@@ -410,8 +410,12 @@ if User_validation():
         with colums[2]:                
             uploaded_file_3 = st.file_uploader("Suba el excel adicional")
         if (uploaded_file_1 is not None) and (uploaded_file_2 is not None) and (uploaded_file_3 is not None):
-                 
-            data=pd.read_excel(uploaded_file_1)
+            try:    
+                data=pd.read_excel(uploaded_file_1)
+                Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
+                Tipo_dia=pd.read_excel(uploaded_file_3,sheet_name="Calendario")
+            except:
+                st.warning("Recuerde que el formato del Excel tiene que ser xls")
             data["Fecha"]=data["FECHAINI"].dt.to_pydatetime()
             
             
@@ -680,10 +684,16 @@ if User_validation():
             uploaded_file_3="Excel_extra_certificados.xls"
             
         if (uploaded_file_1 is not None) and (uploaded_file_2 is not None) and (uploaded_file_3 is not None):
-                     
-            data=pd.read_excel(uploaded_file_1)
-            data["FECHA"]=data["FECHA"].dt.to_pydatetime()
+            try:
+                
+                data=pd.read_excel(uploaded_file_1)
+                Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
+                Tipo_dia=pd.read_excel(uploaded_file_3,sheet_name="Calendario")
+                Agentes=pd.read_excel(uploaded_file_3,sheet_name="Agentes")
+            except:
+                st.warning("Recuerde que el formato del Excel tiene que ser xls")
             
+            data["FECHA"]=data["FECHA"].dt.to_pydatetime()
             
             
             if data["USUARIO"].isnull().values.any():
@@ -693,9 +703,7 @@ if User_validation():
             else:
                 Users=pd.unique(data["USUARIO"])
             
-            Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
-            Tipo_dia=pd.read_excel(uploaded_file_3,sheet_name="Calendario")
-            Agentes=pd.read_excel(uploaded_file_3,sheet_name="Agentes")
+            
             template_file_path = uploaded_file_2
             
             today =  date.today()
