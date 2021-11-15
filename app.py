@@ -992,8 +992,8 @@ if User_validation():
                         font.name = 'Tahoma'
                     
                     # version=1
-                    name_word="Certificado_Reintegros_"+usuario+"_"+eleccion2+"_"+eleccion3+".docx"
-                    name_pdf="Certificado_Reintegros_"+usuario+"_"+eleccion2+"_"+eleccion3+".pdf"
+                    name_word="Certificado_Reintegros_"+usuario+"_"+eleccion2+"_"+str(eleccion3)+".docx"
+                    name_pdf="Certificado_Reintegros_"+usuario+"_"+eleccion2+"_"+str(eleccion3)+".pdf"
                     template_document.save(Ruta_x+name_word)
                     zf.write(Ruta_x+name_word)
                     if b:
