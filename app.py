@@ -1,8 +1,9 @@
 import docx
 from docx.shared import Pt
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
+from docx.shared import Cm
 import os
-
+import math
 import pandas as pd
 import numpy as np
 import re
@@ -17,6 +18,8 @@ import shutil
 import zipfile
 from datetime import datetime
 import platform
+import matplotlib.pyplot as plt
+
 def User_validation():
     
     
@@ -179,7 +182,16 @@ def Range_fecha(dates):
     else:
         return pd.to_datetime(dates[0]).strftime('%Y-%m-%d')+" hasta "+ pd.to_datetime(dates[-1]).strftime('%Y-%m-%d')
 
-        
+def any2str(obj):
+    if isinstance(obj, str):
+        return obj
+    elif isinstance(obj, int):
+        return str(obj)
+    elif isinstance(obj, float):
+        return str(obj)
+    elif math.isnan(obj):
+        return ""
+    
     
 def dt_fechas(data,data_user,Fechas,tipo_dia):
     dt_Final=pd.DataFrame(columns=["Dia","Fecha","Requerimiento","Respaldo"])
@@ -286,7 +298,15 @@ def F_Liq_pag(mes,ano):
         Fecha += " "+ str(ano)
     return Fecha       
     
-        
+def num2money(num):
+    if num < 1e3:
+        return str(round(num,2))
+    elif num < 1e6:
+        return str(round(num*1e3/1e6,2))+ " miles."
+    elif num < 1e9:
+        return str(round(num*1e3/1e9,2))+ " mill."
+    elif num < 1e12:
+        return str(round(num*1e3/1e12,2))+ " mil mill."
     
 def mes_espa(mes):
     
@@ -375,6 +395,31 @@ def dia_esp(dia):
     
     return Dia
 
+
+def set_font(rows,fila,col,size):
+
+    run=rows[fila].cells[col].paragraphs[0].runs
+    font = run[0].font
+    font.size= Pt(size)
+    font.name = 'Tahoma'
+def replace_text_for_image(paragraph, key, value,wid,hei):
+    
+                            
+    if key in paragraph.text:
+        inline = paragraph.runs
+        for item in inline:
+            if key in item.text:
+                item.text = item.text.replace(key, "")
+                
+        
+        for val in value:
+            r = paragraph.add_run()
+            r.add_picture(val,width=Cm(wid), height=Cm(hei))
+
+        
+        
+
+
 def replace_text_in_paragraph(paragraph, key, value):
     if key in paragraph.text:
         inline = paragraph.runs
@@ -382,7 +427,7 @@ def replace_text_in_paragraph(paragraph, key, value):
         for item in inline:
             if key in item.text:
                 item.text = item.text.replace(key, value)
-              
+
 st.set_page_config(
 	layout="centered",  # Can be "centered" or "wide". In the future also "dashboard", etc.
 	initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
@@ -392,13 +437,13 @@ st.set_page_config(
 if User_validation():
     
     
-    Opciones1=("Oferta Libre de Respaldo","Certificado de reintegros","Proyecto 3")
+    Opciones1=("Oferta Firme de Respaldo","Certificado de Reintegros","Proyecto 3")
     eleccion=st.sidebar.selectbox('Seleccione el proyecto',Opciones1)
     
-    
+    # if False:
     if eleccion==Opciones1[0]:
-    #if False:
-        st.header("Creación ofertas libres de respaldo")
+    
+        st.header("Creación ofertas firmes de respaldo")
         st.subheader("Introducción de los documentos")
         
         
@@ -445,6 +490,7 @@ if User_validation():
                 P_contrato=st.text_input("Introduzca el precio del contrato [USD]",value="10.00")
                 P_TMR=st.text_input("Introduzca el valor de la TRM",value="3,950.00")
                 F_TRM = st.date_input("Seleccione la fecha del valor de la TRM:",value=today).strftime("%Y-%m-%d")
+                Agente_extra = st.text_input("Introduzca el nombre particular del agente")
                 
             columns_2 = st.columns([1,2,2,1])
             
@@ -455,7 +501,12 @@ if User_validation():
                 eleccion2=st.selectbox('Seleccione el mes de la OFR',Opciones2)
             with columns_2[2]:
                 eleccion3=st.selectbox('Selecciona la semana de la OFR',Opciones3)
-                
+            
+            
+            if Agente_extra:
+                Agente_extra="-"+Agente_extra
+            else:
+                Agente_extra=""
             columns_3 = st.columns([2,1,2])
 
             with columns_3[1]:
@@ -633,13 +684,13 @@ if User_validation():
                     
                     version=1
                 
-                    template_document.save(Ruta_x+usuario+"_OFR"+".docx")
-                    zf.write(Ruta_x+usuario+"_OFR"+".docx")
+                    template_document.save(Ruta_x+usuario+"_OFR"+Agente_extra+".docx")
+                    zf.write(Ruta_x+usuario+"_OFR"+Agente_extra+".docx")
                     if b:
                         
-                        docx2pdf.convert(Ruta_x+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+".pdf")
-                        zf.write(Ruta_x+usuario+"_OFR"+".pdf")
-                    File_names.extend([usuario+"_OFR"+".docx"])
+                        docx2pdf.convert(Ruta_x+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+Agente_extra+".pdf")
+                        zf.write(Ruta_x+usuario+"_OFR"+Agente_extra+".pdf")
+                    File_names.extend([usuario+"_OFR"+Agente_extra+".docx"])
                     
                     steps_done += 1    
                     my_bar.progress(int(steps_done*100/steps))
@@ -664,7 +715,7 @@ if User_validation():
                     
         else:
             st.warning("Necesita subir los tres archivos")   
-    #else:
+    #elif False:
     elif eleccion==Opciones1[1]:
         st.header("Creación certificados de reintegros")
         st.subheader("Introducción de los documentos")
@@ -1025,9 +1076,447 @@ if User_validation():
                 
         else:
             st.warning("Necesita subir los tres archivos")   
+    #elif True:
+    elif eleccion==Opciones1[2]:
+        st.header("Creación consolidados mensuales")
+        st.subheader("Introducción de los documentos")
+        if True:
+            colums= st.columns([1,1])
+            with colums[0]:                
+                uploaded_file_1 = st.file_uploader("Suba el documento de base principal")
+            with colums[1]:                
+                uploaded_file_2 = st.file_uploader("Suba la plantilla del documento")
+            # with colums[2]:                
+            #     uploaded_file_3 = st.file_uploader("Suba el excel adicional")
+            
+                
+        else:
+            uploaded_file_1="Excel_base.xlsx"
+            uploaded_file_2="Plantilla_base.docx"
+            # uploaded_file_3="Excel_extra_certificados.xls"
+            
+        if (uploaded_file_1 is not None) and (uploaded_file_2 is not None): #and (uploaded_file_3 is not None):
+            try:
+                
+                excel_1=pd.ExcelFile(uploaded_file_1)
+                Fronteras=pd.read_excel(excel_1,"FRONTERAS")
+                Usuarios=pd.read_excel(excel_1,"USUARIOS")
+                Year_list=[s for s in excel_1.sheet_names if "INGRESOS" in s]
+                Ingresos=pd.read_excel(excel_1,Year_list)
+                #Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
+                #Tipo_dia=pd.read_excel(uploaded_file_3,sheet_name="Calendario")
+                #Agentes=pd.read_excel(uploaded_file_3,sheet_name="Agentes")
+            except:
+                st.warning("Recuerde que el formato del Excel tiene que ser xls")
+            
+            
+            
+            if Usuarios["USUARIO"].isnull().values.any():
+                st.warning("Revisar archivo de consolidado base, usuario no encontrado.")   
+                Usuarios.dropna(subset = ["USUARIO"], inplace=True)
+                Users=pd.unique(Usuarios["USUARIO"])
+                Users = Users[Users != "JULIA-RD"]
+            else:
+                Users=pd.unique(Usuarios["USUARIO"])
+                Users = Users[Users != "JULIA-RD"]
+            
+            template_file_path = uploaded_file_2
+            
+            today =  date.today()
+            fecha=dia_esp(today.strftime("%d")) +" de "+ mes_espa(today.strftime("%m")) +" de "+ today.strftime("%Y")
+            
+            
+            colums= st.columns([1,4,1])
+            with colums[1]:
+                
+                st.subheader("Introducción de las variables")
+                
+            columns_2 = st.columns([1,2,2,1])
+            
+            Opciones2=("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
+            
+            with columns_2[1]:
+                eleccion3=st.number_input('Seleccione el año del -',value=today.year)
+            with columns_2[2]:
+                eleccion2=st.selectbox('Seleccione el mes del -',Opciones2)
+            
+                
+            columns_3 = st.columns([2,1,2])
+
+            with columns_3[1]:
+                if platform.system()=='Windows':
+                    b=st.checkbox("PDF")
+                else:
+                    
+                    b=False
+                a=st.button("Crear los documentos")
+                
+            Ruta="Documentos/Proyecto_3/"+str(eleccion3) +"/"+ mes_num(eleccion2)+"-"+eleccion2 
+            Ruta_x="Documentos_exportar"
+            if os.path.exists(Ruta_x):
+                shutil.rmtree(Ruta_x)
+                
+                Ruta_x=Ruta_x+"/"
+            else:
+                Ruta_x=Ruta_x+"/"
+            os.makedirs(Ruta_x, exist_ok=True)
+            
+            if a:
+                try:
+                    path1 = os.path.join(Ruta)
+                    shutil.rmtree(path1)
+                    os.makedirs(Ruta, exist_ok=True)
+                except:
+                    os.makedirs(Ruta, exist_ok=True)
+                
+                
+                Ruta_word=Ruta+"/Word"
+                Ruta_pdf=Ruta+"/PDF"    
+                
+                Info ={"Ruta": Ruta, 
+                      "File_names": None
+                    } 
+                   
+                File_names=[]
+                           
+                os.makedirs(Ruta_word, exist_ok=True)
+                if b:
+                    
+                    os.makedirs(Ruta_pdf, exist_ok=True)
+                
+                    
+                os.makedirs(Ruta_word, exist_ok=True)
+                if b:
+                    
+                    os.makedirs(Ruta_pdf, exist_ok=True)
+                
+                zf = zipfile.ZipFile(
+                    "Resultado.zip", "w", zipfile.ZIP_DEFLATED)
+                my_bar=st.progress(0)
+                text_rest = st.empty()
+                steps=len(Users)
+                steps_done=0
+                for usuario in Users:
+                    
+                    text_rest.text("Progreso: "+str(steps_done)+"/"+str(steps) + " -  Actualmente en el usuario: " +usuario )
+            
+                    data_user=Usuarios.copy()
+                    data_user=data_user[data_user["USUARIO"]==usuario] 
+                    
+                    Num_fronteras = data_user["NUMERO DE FRONTERAS"].values[0]
+                    Ene_agregada =  data_user["ENERGÍA AGREGADA"].values[0]
+                    Contrato = data_user["CONTRATO"].values[0]
+                    Ven_contrato = data_user["VENCIMIENTO CONTRATO"].values[0]
+                    Ejecutivo=data_user["EJECUTIVO DE CUENTA"].values[0]
+                    Extra_1=data_user["PUNTO FOCAL"].values[0]
+                    try:
+                        if math.isnan(Extra_1):
+                            Extra_1 = ""
+                        elif isinstance(Extra_1, int):
+                            Extra_1 = str(Extra_1)
+                    except:
+                        pass
+                    try:
+                        if math.isnan(Contrato):
+                            Contrato = ""
+                    except:
+                        pass
+                    try:
+                        if isinstance(Ven_contrato, datetime):
+                            Ven_contrato=Ven_contrato.strftime("%d/%m/%Y")
+                        elif isinstance(Ven_contrato, int):
+                            Ven_contrato = str(Ven_contrato)
+                        elif math.isnan(Ven_contrato):
+                            Ven_contrato = ""
+                    except:
+                        pass
+                    try:
+                        Punto_focal = str(Usuarios[Usuarios["USUARIO"] == usuario]["PUNTO FOCAL"].values)
+                    except:
     
+                        Punto_focal  = ""
+                        st.warning("No hay coincidencia en el Excel de usuarios para: "+usuario)   
+                        
+                    Punto_focal  = re.sub("\[|\]|\'|0","",Punto_focal )
+
+   
+                   
+                    template_document = docx.Document(template_file_path)
         
+
+                                        
+                    
+                    
+                    
+                    Anos_dias=[s for s in data_user.columns if "DÍAS CERTIFICADOS " in s]
+                    Anos=[]
+                    
+                    for value in Anos_dias:
+                        if data_user[value].values[0] != 0:
+                            
+                            Anos.append(value.replace('DÍAS CERTIFICADOS ', ''))
+                            
+                    rows = template_document.tables[0].rows
+                    
+                    contador=0
+                    for idx,val in enumerate(Anos):
+                        rows[6+contador].cells[0].text = f'{data_user["INGRESO "+val].values[0]:,}'
+                        rows[7+contador].cells[0].text = "INGRESO "+val
+                        
+                        
+                        rows[6+contador].cells[2].text = f'{data_user["DÍAS CERTIFICADOS "+val].values[0]:,}'
+                        rows[7+contador].cells[2].text = "DÍAS CERTIFICADOS "+val
+                        
+                        
+                        rows[6+contador].cells[3].text = f'{data_user["ENERGIA RESPALDADA "+val].values[0]:,}'
+                        rows[7+contador].cells[3].text = "ENERGIA RESPALDADA "+val
+                        for idx_2 in [0,2,3]:
+                            set_font(rows,6+contador,idx_2,8)
+                            set_font(rows,7+contador,idx_2,7)
+                        contador += 3
+                    cont_enter=0
+                    for idx in np.arange(0,28-(6+contador)):
+                        
+                        remove_row(template_document.tables[0], rows[-1])    
+                        cont_enter += 1
+                        
+                        
+                        
+                    
+                    if len(Anos) > 2:
+                        Enter_final="\n"*cont_enter
+                        
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${IMGENES_2}", '${IMA_INGRESOS}')
+                            if "${IMA_INGRESOS}" in  paragraph.text:
+                                run = paragraph.add_run()
+                                run.add_break(WD_BREAK.PAGE)
+                        
+                    elif len(Anos) == 1:
+                        Enter_final="\n"*int(cont_enter/4)+'${IMA_INGRESOS}'+"\n"*int(cont_enter/4)
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
+                    elif len(Anos) == 2:
+                        Enter_final='${IMA_INGRESOS}'
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
+                        
+                     
+                    variables = {
+                        "${USUARIO}": usuario,
+                        "${EJECUTIVO}":Ejecutivo,
+                        "${NUM_FRONTE}": str(Num_fronteras),
+                        "${ENE_AGREGADA}": f'{Ene_agregada:,}',
+                        "${CONTRATO}": Contrato,
+                        "${VEN_CONTRATO}": Ven_contrato,
+                        "${PUNTO_FOC}":Extra_1,
+                        "${ENTER}":Enter_final
+                    }
+                    
+                        
+                        
+                    for variable_key, variable_value in variables.items():
+    
+                        for section in template_document.sections:
+                            for paragraph in section.header.paragraphs:
+                                
+                                replace_text_in_paragraph(paragraph, variable_key, variable_value)
+    
+                        for paragraph in template_document.paragraphs:
+                    
+                            replace_text_in_paragraph(paragraph, variable_key, variable_value)
+                
+                        for table in template_document.tables:
+                            for col in table.columns:
+                                for cell in col.cells:
+                                    for paragraph in cell.paragraphs:
+                                        replace_text_in_paragraph(paragraph, variable_key, variable_value)
+                    Ruta_img="Imagenes"
+                    try:
+                        pathx = os.path.join(Ruta_img)
+                        shutil.rmtree(pathx)
+                        os.makedirs(Ruta_img, exist_ok=True)
+                    except:
+                        os.makedirs(Ruta_img, exist_ok=True)
+                    Imagenes_name=[]
+                    color_b = [(0.94,0.49,0.15,1),(0.9,0.13,0.28,1),(0.61,0.61,0.61,1)]
+                    Meses=np.array(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"])
+                    for idx,val in enumerate(Anos):
+                        name="INGRESOS "+val+".png"
+                        data_graph=Ingresos["INGRESOS "+val][Ingresos["INGRESOS "+val]["USUARIO"]==usuario]
+                        data_graph= data_graph.dropna(how='all', axis=1)
+                        data_graph['MES'] = Meses[data_graph['FECHA'].dt.month-1]
+                        if len(data_graph['MES'].unique()) != len(data_graph['MES']):
+                            st.warning("Mes repetido revisar "+ "INGRESOS "+val+ " para el usuario "+ usuario)
+                        fig = plt.figure(figsize=(9, 3.38))
+                        ax = fig.add_axes([0,0,1,1])
+                        Meses_gr = data_graph['MES']
+                        Ingresos_gr = data_graph["INGRESOS "+val]
+                        ax.bar(Meses_gr,Ingresos_gr,color=color_b[idx % 3])
+                        plt.xlabel("")
+                        plt.ylabel("Ingresos [COP]")
+                        plt.title("INGRESOS "+val)
+                        max_val=Ingresos_gr.max()
+                        if len(data_graph['MES'])>10:
+                            plt.xticks(rotation=90)
+                        plt.ylim((0,max_val*1.2))
+                        
+                        for idx,value in enumerate(list(data_graph.index)):
+                                plt.text(x = idx , y = data_graph.loc[value]["INGRESOS "+val] + Ingresos_gr.max()*0.05, s = num2money(data_graph.loc[value]["INGRESOS "+val]), size = 9,ha='center',va='center')
+                                
+                        plt.gca().axes.get_yaxis().set_visible(False)
+                        plt.savefig(Ruta_img+"/"+name,dpi=80, bbox_inches='tight',transparent=True)
+                        Imagenes_name.extend([Ruta_img+"/"+name])
+                    
+                    
+                    
+                    
+                    
+                    
+                    Var_imagenes = {
+                        "${IMA_INGRESOS}": Imagenes_name 
+                    }
+                    
+                    for variable_key, variable_value in Var_imagenes.items():
+    
+                        
+                                
+                        for paragraph in template_document.paragraphs:
+                    
+                            replace_text_for_image(paragraph, variable_key,variable_value,10.77,4.04)
+                        
+                    
+                    Imagenes_name=[]
+                    Suma_dia=np.array([])
+                    color_b = [(0.94,0.49,0.15,1),(0.9,0.13,0.28,1),(0.61,0.61,0.61,1)]
+                    dias=np.array(['1. LUNES', '2. MARTES','3. MIERCOLES', '4. JUEVES', '5. VIERNES', '6. SÁBADO', '7. DOMINGO','PROMEDIO'])
+                    
+                    name="FRONTERAS.png"
+                    data_graph=Fronteras[Fronteras["USUARIO"]==usuario]
+                    
+                    if data_graph.size !=0:
+                        data_graph= data_graph.dropna(how='all', axis=1)
+                        for idx_2 in dias:
+                            suma=data_graph[idx_2].sum()
+                            Suma_dia=np.append([suma],Suma_dia)
+                            
+                        
+                        fig = plt.figure(figsize=(9, 2.8))
+                        ax = fig.add_axes([0,0,1,1])
+    
+                        ax.bar(dias,Suma_dia,color=color_b[0])
+                        plt.xlabel("")
+                        plt.ylabel("Ingresos [COP]")
+                        max_val=Suma_dia.max()
+            
+                        plt.ylim((0,max_val*1.2))
+                        
+                        for idx,value in enumerate(Suma_dia):
+                                plt.text(x = idx , y = value + max_val*0.05, s = f'{int(value):,}', size = 9,ha='center',va='center')
+                                
+                        #plt.gca().axes.get_yaxis().set_visible(False)
+                        plt.savefig(Ruta_img+"/"+name,dpi=200, bbox_inches='tight',transparent=True)
+                        Imagenes_name.extend([Ruta_img+"/"+name])
+                        
+                        
+                        
+                        
+                        
+                        
+                        Var_imagenes = {
+                            "${IMGENES_3}": Imagenes_name 
+                        }
+                        
+                        for variable_key, variable_value in Var_imagenes.items():
         
+                            
+                                    
+                            for paragraph in template_document.paragraphs:
+                        
+                                replace_text_for_image(paragraph, variable_key,variable_value,23,7.15)
+                    
+    
+                    
+    
+    
+                        rows = template_document.tables[4].rows
+                        
+                        contador=0
+                        for idx,val in enumerate(data_graph.index):
+                            
+                            
+                            rows[idx+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
+                            rows[idx+1].cells[1].text = any2str(data_graph["FRT DDV"].values[idx])
+                            rows[idx+1].cells[2].text = any2str(data_graph["COD SIC"].values[idx])
+                            rows[idx+1].cells[3].text = any2str(data_graph["PREDIO"].values[idx])
+                            rows[idx+1].cells[4].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
+                            rows[idx+1].cells[5].text = any2str(data_graph["MARGEN"].values[idx])
+                            rows[idx+1].cells[6].text = any2str(data_graph["ÚLTIMA DESCONEXION"].values[idx].strftime("%d/%m/%Y"))
+                            rows[idx+1].cells[7].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
+                            rows[idx+1].cells[8].text = any2str(data_graph["ACTUALIZACION"].values[idx].strftime("%d/%m/%Y"))
+                            try:
+                                rows[idx+1].cells[9].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%d/%m/%Y"))
+                            except:
+                                
+                                rows[idx+1].cells[9].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
+                                
+    
+                            for idx_2 in range(0,10):
+                                set_font(rows,idx+1,idx_2,8)
+                            contador+=1
+                            
+                        for idx in np.arange(0,200-contador):
+                            remove_row(template_document.tables[4], rows[-1])   
+                        
+                    else:
+                        st.warning("El usuario "+usuario+" no se encuentra en la hoja de Fronteras")
+                        rows = template_document.tables[4].rows
+                        for idx in np.arange(0,201):
+                            remove_row(template_document.tables[4], rows[-1])
+                            
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${IMGENES_3}", '')
+                        
+                    
+                     
+                        
+    
+                    name_word="Proyecto_3_"+usuario+"_"+eleccion2+"_"+str(eleccion3)+".docx"
+                    name_pdf="Proyecto_3_"+usuario+"_"+eleccion2+"_"+str(eleccion3)+".pdf"
+                    template_document.save(Ruta_x+name_word)
+                    zf.write(Ruta_x+name_word)
+                    if b:
+                        
+                        docx2pdf.convert(Ruta_x+name_word, Ruta_x+name_pdf)
+                        zf.write(Ruta_x+name_pdf)
+                    File_names.extend([name_word])
+                    
+                    steps_done += 1    
+                    my_bar.progress(int(steps_done*100/steps))
+                    
+                    text_rest.text("Progreso: "+str(steps_done)+"/"+str(steps) + " -  Actualmente en el usuario: " +usuario )
+                    
+                        
+                        
+                Info.update({"File_names":File_names})
+                json_info = json.dumps(Info, indent = 4)
+                with open(Ruta_x+'/00_data.json', 'w') as f:
+                    json.dump(json_info, f)
+                zf.write(Ruta_x+'/00_data.json')    
+                zf.close()
+                
+                
+                with open("Resultado.zip", "rb") as fp:
+                    with columns_3[1]:
+                        btn = st.download_button(
+                            label="Descargar resultados",
+                            data=fp,
+                            file_name="Resultado.zip",
+                            mime="application/zip"
+                        )
+                
+        else:
+            st.warning("Necesita subir los dos archivos") 
     
         
           
