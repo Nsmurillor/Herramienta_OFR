@@ -860,19 +860,19 @@ if User_validation():
                     Email = re.sub("\[|\]|\'|0","",Email)
                     
                     
-                    tx_empresas=""
-                    for idx ,val in enumerate(Empresas):
+                    # tx_empresas=""
+                    # for idx ,val in enumerate(Empresas):
                         
-                        if len(Empresas)<4:
-                            val_2=val[0:3]
-                            tx_empresas += val_2
-                            if idx==len(Empresas)-1:
-                                pass
-                            else:
-                                tx_empresas +=", "
+                    #     if len(Empresas)<4:
+                    #         val_2=val[0:3]
+                    #         tx_empresas += val_2
+                    #         if idx==len(Empresas)-1:
+                    #             pass
+                    #         else:
+                    #             tx_empresas +=", "
                             
-                        else:
-                            tx_empresas += "Los Generadores"
+                    #     else:
+                    #         tx_empresas += "Los Generadores"
                         
                     
                     
@@ -890,7 +890,7 @@ if User_validation():
                         "${FECHA}": fecha,
                         "${MES}": eleccion2,
                         "${ANO}": str(eleccion3),
-                        "${AGENTES}": tx_empresas,
+                        # "${AGENTES}": tx_empresas,
                         "${USUARIO}": usuario,
                         "${OFERTA_MAX}": f'{REQ_MAXIMO:,}',
                         "${FECHA_TRM}": F_TRM,
