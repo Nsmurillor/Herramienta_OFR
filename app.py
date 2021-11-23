@@ -1114,11 +1114,25 @@ if User_validation():
             if Usuarios["USUARIO"].isnull().values.any():
                 st.warning("Revisar archivo de consolidado base, usuario no encontrado.")   
                 Usuarios.dropna(subset = ["USUARIO"], inplace=True)
-                Users=pd.unique(Usuarios["USUARIO"])
-                Users = Users[Users != "JULIA-RD"]
+                Users1=pd.unique(Usuarios["USUARIO"])
+                Users1= Users1[Users1 != "JULIA-RD"]
             else:
-                Users=pd.unique(Usuarios["USUARIO"])
-                Users = Users[Users != "JULIA-RD"]
+                Users1=pd.unique(Usuarios["USUARIO"])
+                Users1= Users1[Users1 != "JULIA-RD"]
+            
+            if Fronteras["USUARIO"].isnull().values.any():
+                st.warning("Revisar archivo de consolidado base, usuario no encontrado.")   
+                Usuarios.dropna(subset = ["USUARIO"], inplace=True)
+                Users2=pd.unique(Fronteras["USUARIO"])
+                Users2= Users2[Users2 != "JULIA-RD"]
+            else:
+                Users2=pd.unique(Fronteras["USUARIO"])
+                Users2= Users2[Users2 != "JULIA-RD"]
+                
+            if False:
+                Users = Users1
+            else:
+                Users = np.intersect1d(Users1, Users2)
             
             template_file_path = uploaded_file_2
             
@@ -1140,9 +1154,19 @@ if User_validation():
             with columns_2[2]:
                 eleccion2=st.selectbox('Seleccione el mes del -',Opciones2)
             
-                
+            columns_4 = st.columns([1,4,1])
+            with columns_4[1]:
+                eleccion4=st.number_input('Seleccione el último año incluido en las tablas',value=today.year)
+            columns_5 = st.columns([1,10,1])
+            Users_options=Users.copy()
+            Users_options=np.append(["TODAS LAS OPCIONES"],Users_options)
+            with columns_5[1]:
+                Users_eleccion=st.multiselect('Seleccione los usuarios para obtener el documento',options=Users_options,default=["TODAS LAS OPCIONES"])
+        
+            if not np.any(np.array(Users_eleccion)=="TODAS LAS OPCIONES"):
+                Users=Users_eleccion
             columns_3 = st.columns([2,1,2])
-
+            
             with columns_3[1]:
                 if platform.system()=='Windows':
                     b=st.checkbox("PDF")
@@ -1196,6 +1220,7 @@ if User_validation():
                 text_rest = st.empty()
                 steps=len(Users)
                 steps_done=0
+                
                 for usuario in Users:
                     
                     text_rest.text("Progreso: "+str(steps_done)+"/"+str(steps) + " -  Actualmente en el usuario: " +usuario )
@@ -1282,7 +1307,11 @@ if User_validation():
                         
                         
                         
-                    
+                    if len(Anos) ==0:
+                        st.warning("El usuario "+ usuario+" no tiene registros anuales" )
+                        Enter_final ="\n"*cont_enter
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
                     if len(Anos) > 2:
                         Enter_final="\n"*cont_enter
                         
@@ -1348,6 +1377,7 @@ if User_validation():
                         data_graph['MES'] = Meses[data_graph['FECHA'].dt.month-1]
                         if len(data_graph['MES'].unique()) != len(data_graph['MES']):
                             st.warning("Mes repetido revisar "+ "INGRESOS "+val+ " para el usuario "+ usuario)
+                            
                         fig = plt.figure(figsize=(9, 3.38))
                         ax = fig.add_axes([0,0,1,1])
                         Meses_gr = data_graph['MES']
@@ -1400,7 +1430,14 @@ if User_validation():
                             suma=data_graph[idx_2].sum()
                             Suma_dia=np.append([suma],Suma_dia)
                             
-                        
+                        Suma_dia=np.flip(Suma_dia)  
+                        if Suma_dia.sum()==0:
+                            st.warning("El usuario "+ usuario+ " no tiene registros semanales")
+                            for paragraph in template_document.paragraphs:
+                                replace_text_in_paragraph(paragraph, "${IMGENES_3}", '')
+                            extra=1
+                        else:
+                            extra=0
                         fig = plt.figure(figsize=(9, 2.8))
                         ax = fig.add_axes([0,0,1,1])
     
@@ -1443,29 +1480,28 @@ if User_validation():
                         
                         contador=0
                         for idx,val in enumerate(data_graph.index):
+                            if (int(data_graph["ACTUALIZACION"].values[idx].strftime("%Y")) >= eleccion4):
+                                rows[idx+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
+                                rows[idx+1].cells[1].text = any2str(data_graph["FRT DDV"].values[idx])
+                                rows[idx+1].cells[2].text = any2str(data_graph["COD SIC"].values[idx])
+                                rows[idx+1].cells[3].text = any2str(data_graph["PREDIO"].values[idx])
+                                rows[idx+1].cells[4].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
+                                rows[idx+1].cells[5].text = any2str(data_graph["MARGEN"].values[idx])
+                                rows[idx+1].cells[6].text = any2str(data_graph["ÚLTIMA DESCONEXION"].values[idx].strftime("%Y-%m-%d"))
+                                rows[idx+1].cells[7].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
+                                rows[idx+1].cells[8].text = any2str(data_graph["ACTUALIZACION"].values[idx].strftime("%Y-%m-%d"))
+                                try:
+                                    rows[idx+1].cells[9].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%Y-%m-%d"))
+                                except:
+                                    
+                                    rows[idx+1].cells[9].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
+                                    
+        
+                                for idx_2 in range(0,10):
+                                    set_font(rows,idx+1,idx_2,8)
+                                contador+=1
                             
-                            
-                            rows[idx+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
-                            rows[idx+1].cells[1].text = any2str(data_graph["FRT DDV"].values[idx])
-                            rows[idx+1].cells[2].text = any2str(data_graph["COD SIC"].values[idx])
-                            rows[idx+1].cells[3].text = any2str(data_graph["PREDIO"].values[idx])
-                            rows[idx+1].cells[4].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
-                            rows[idx+1].cells[5].text = any2str(data_graph["MARGEN"].values[idx])
-                            rows[idx+1].cells[6].text = any2str(data_graph["ÚLTIMA DESCONEXION"].values[idx].strftime("%d/%m/%Y"))
-                            rows[idx+1].cells[7].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
-                            rows[idx+1].cells[8].text = any2str(data_graph["ACTUALIZACION"].values[idx].strftime("%d/%m/%Y"))
-                            try:
-                                rows[idx+1].cells[9].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%d/%m/%Y"))
-                            except:
-                                
-                                rows[idx+1].cells[9].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
-                                
-    
-                            for idx_2 in range(0,10):
-                                set_font(rows,idx+1,idx_2,8)
-                            contador+=1
-                            
-                        for idx in np.arange(0,200-contador):
+                        for idx in np.arange(0,200-contador+extra):
                             remove_row(template_document.tables[4], rows[-1])   
                         
                     else:
