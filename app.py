@@ -1334,7 +1334,7 @@ if User_validation():
                         "${USUARIO}": usuario,
                         "${EJECUTIVO}":any2str(Ejecutivo),
                         "${NUM_FRONTE}": str(Num_fronteras),
-                        "${ENE_AGREGADA}": f'{Ene_agregada:,}',
+                        "${ENE_AGREGADA}": f'{round(Ene_agregada):,}',
                         "${CONTRATO}": Contrato,
                         "${VEN_CONTRATO}": Ven_contrato,
                         "${PUNTO_FOC}":Extra_1,
@@ -1451,7 +1451,7 @@ if User_validation():
                                 plt.text(x = idx , y = value + max_val*0.05, s = f'{int(value):,}', size = 9,ha='center',va='center')
                                 
                         #plt.gca().axes.get_yaxis().set_visible(False)
-                        plt.savefig(Ruta_img+"/"+name,dpi=200, bbox_inches='tight',transparent=True)
+                        plt.savefig(Ruta_img+"/"+name,dpi=80, bbox_inches='tight',transparent=True)
                         Imagenes_name.extend([Ruta_img+"/"+name])
                         
                         
@@ -1486,7 +1486,7 @@ if User_validation():
                                     rows[contador+1].cells[2].text = any2str(data_graph["PREDIO"].values[idx])
                                     rows[contador+1].cells[3].text = any2str(data_graph["FRT DDV"].values[idx])
                                     rows[contador+1].cells[4].text = any2str(data_graph["TIPO DDV"].values[idx])
-                                    rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
+                                    rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[idx]):,}')
                                     rows[contador+1].cells[6].text = any2str(data_graph["ACTUALIZACION"].values[idx].strftime("%Y-%m-%d"))
                                     rows[contador+1].cells[7].text = any2str(data_graph["MARGEN"].values[idx])
                                     rows[contador+1].cells[8].text = any2str(data_graph["ÚLTIMA DESCONEXION"].values[idx].strftime("%Y-%m-%d"))
@@ -1506,7 +1506,7 @@ if User_validation():
                                     rows[contador+1].cells[2].text = any2str(data_graph["PREDIO"].values[idx])
                                     rows[contador+1].cells[3].text = any2str(data_graph["FRT DDV"].values[idx])
                                     rows[contador+1].cells[4].text = any2str(data_graph["TIPO DDV"].values[idx])
-                                    rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
+                                    rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[idx]):,}')
                                     rows[contador+1].cells[6].text = "NO APLICA"
                                     rows[contador+1].cells[7].text = any2str(data_graph["MARGEN"].values[idx])
                                     rows[contador+1].cells[8].text = "NO APLICA"
