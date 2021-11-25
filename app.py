@@ -1479,46 +1479,55 @@ if User_validation():
                         
                         contador=0
                         for idx,val in enumerate(data_graph.index):
-                            if (int(data_graph["ACTUALIZACION"].values[idx].strftime("%Y")) >= 2018):
-                                rows[contador+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
-                                rows[contador+1].cells[1].text = any2str(data_graph["COD SIC"].values[idx])
-                                rows[contador+1].cells[2].text = any2str(data_graph["PREDIO"].values[idx])
-                                rows[contador+1].cells[3].text = any2str(data_graph["FRT DDV"].values[idx])
-                                rows[contador+1].cells[4].text = any2str(data_graph["TIPO DDV"].values[idx])
-                                rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
-                                rows[contador+1].cells[6].text = any2str(data_graph["ACTUALIZACION"].values[idx].strftime("%Y-%m-%d"))
-                                rows[contador+1].cells[7].text = any2str(data_graph["MARGEN"].values[idx])
-                                rows[contador+1].cells[8].text = any2str(data_graph["ÚLTIMA DESCONEXION"].values[idx].strftime("%Y-%m-%d"))
-                                rows[contador+1].cells[9].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
-                                try:
-                                    rows[contador+1].cells[10].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%Y-%m-%d"))
-                                except:
-                                    
-                                    rows[contador+1].cells[10].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
-
-                                for idx_2 in range(0,10):
+                            try:
+                                if (int(data_graph["ACTUALIZACION"].values[idx].strftime("%Y")) >= 2018):
+                                    rows[contador+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
+                                    rows[contador+1].cells[1].text = any2str(data_graph["COD SIC"].values[idx])
+                                    rows[contador+1].cells[2].text = any2str(data_graph["PREDIO"].values[idx])
+                                    rows[contador+1].cells[3].text = any2str(data_graph["FRT DDV"].values[idx])
+                                    rows[contador+1].cells[4].text = any2str(data_graph["TIPO DDV"].values[idx])
+                                    rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
+                                    rows[contador+1].cells[6].text = any2str(data_graph["ACTUALIZACION"].values[idx].strftime("%Y-%m-%d"))
+                                    rows[contador+1].cells[7].text = any2str(data_graph["MARGEN"].values[idx])
+                                    rows[contador+1].cells[8].text = any2str(data_graph["ÚLTIMA DESCONEXION"].values[idx].strftime("%Y-%m-%d"))
+                                    rows[contador+1].cells[9].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
+                                    try:
+                                        rows[contador+1].cells[10].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%Y-%m-%d"))
+                                    except:
+                                        
+                                        rows[contador+1].cells[10].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
+    
+                                    for idx_2 in range(0,10):
+                                        set_font(rows,contador+1,idx_2,8)
+                                    contador+=1
+                                else:
+                                    rows[contador+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
+                                    rows[contador+1].cells[1].text = any2str(data_graph["COD SIC"].values[idx])
+                                    rows[contador+1].cells[2].text = any2str(data_graph["PREDIO"].values[idx])
+                                    rows[contador+1].cells[3].text = any2str(data_graph["FRT DDV"].values[idx])
+                                    rows[contador+1].cells[4].text = any2str(data_graph["TIPO DDV"].values[idx])
+                                    rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
+                                    rows[contador+1].cells[6].text = "NO APLICA"
+                                    rows[contador+1].cells[7].text = any2str(data_graph["MARGEN"].values[idx])
+                                    rows[contador+1].cells[8].text = "NO APLICA"
+                                    rows[contador+1].cells[9].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
+                                    try:
+                                        rows[contador+1].cells[10].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%Y-%m-%d"))
+                                    except:
+                                        
+                                        rows[contador+1].cells[10].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
+    
+                                    for idx_2 in range(0,10):
+                                        set_font(rows,contador+1,idx_2,8)
+                                    contador+=1
+                            except:
+                                st.warning("Error en hoja fronteras para usuario: "+ usuario)
+                                for idx_2 in range(0,11):
+                                    rows[contador+1].cells[idx_2].text = "ERROR"
                                     set_font(rows,contador+1,idx_2,8)
                                 contador+=1
-                            else:
-                                rows[contador+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
-                                rows[contador+1].cells[1].text = any2str(data_graph["COD SIC"].values[idx])
-                                rows[contador+1].cells[2].text = any2str(data_graph["PREDIO"].values[idx])
-                                rows[contador+1].cells[3].text = any2str(data_graph["FRT DDV"].values[idx])
-                                rows[contador+1].cells[4].text = any2str(data_graph["TIPO DDV"].values[idx])
-                                rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
-                                rows[contador+1].cells[6].text = "NO APLICA"
-                                rows[contador+1].cells[7].text = any2str(data_graph["MARGEN"].values[idx])
-                                rows[contador+1].cells[8].text = "NO APLICA"
-                                rows[contador+1].cells[9].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
-                                try:
-                                    rows[contador+1].cells[10].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%Y-%m-%d"))
-                                except:
                                     
-                                    rows[contador+1].cells[10].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
-
-                                for idx_2 in range(0,10):
-                                    set_font(rows,contador+1,idx_2,8)
-                                contador+=1
+                                    
                             
                         for idx in np.arange(0,200-contador+extra):
                             remove_row(template_document.tables[4], rows[-1])   
