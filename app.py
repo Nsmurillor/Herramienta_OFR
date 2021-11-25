@@ -185,12 +185,13 @@ def Range_fecha(dates):
 def any2str(obj):
     if isinstance(obj, str):
         return obj
+    elif math.isnan(obj):
+        return ""
     elif isinstance(obj, int):
         return str(obj)
     elif isinstance(obj, float):
         return str(obj)
-    elif math.isnan(obj):
-        return ""
+    
     
     
 def dt_fechas(data,data_user,Fechas,tipo_dia):
@@ -437,7 +438,7 @@ st.set_page_config(
 if User_validation():
     
     
-    Opciones1=("Oferta Firme de Respaldo","Certificado de Reintegros","Proyecto 3")
+    Opciones1=("Oferta Firme de Respaldo","Certificado de Reintegros","Informe Comercial")
     eleccion=st.sidebar.selectbox('Seleccione el proyecto',Opciones1)
     
     # if False:
@@ -504,7 +505,7 @@ if User_validation():
             
             
             if Agente_extra:
-                Agente_extra="-"+Agente_extra
+                Agente_extra="_"+Agente_extra
             else:
                 Agente_extra=""
             columns_3 = st.columns([2,1,2])
@@ -684,13 +685,14 @@ if User_validation():
                     
                     version=1
                 
-                    template_document.save(Ruta_x+usuario+"_OFR"+Agente_extra+".docx")
-                    zf.write(Ruta_x+usuario+"_OFR"+Agente_extra+".docx")
+                    template_document.save(Ruta_x+usuario+"_OFR"+Agente_extra+"_"+eleccion2+"_"+str(today.year)+".docx")
+                    zf.write(Ruta_x+usuario+"_OFR"+Agente_extra+"_"+eleccion2+"_"+str(today.year)+".docx")
                     if b:
                         
-                        docx2pdf.convert(Ruta_x+"_OFR"+".docx", Ruta_pdf+"/"+usuario+"_OFR"+Agente_extra+".pdf")
-                        zf.write(Ruta_x+usuario+"_OFR"+Agente_extra+".pdf")
-                    File_names.extend([usuario+"_OFR"+Agente_extra+".docx"])
+                        docx2pdf.convert(Ruta_x+usuario+"_OFR"+Agente_extra+"_"+eleccion2+"_"+str(today.year)+".docx", 
+                                         Ruta_pdf+"/"+usuario+"_OFR"+Agente_extra+"_"+eleccion2+"_"+str(today.year)+".pdf")
+                        zf.write(Ruta_pdf+"/"+usuario+"_OFR"+Agente_extra+"_"+eleccion2+"_"+str(today.year)+".pdf")
+                    File_names.extend([usuario+"_OFR"+Agente_extra+"_"+eleccion2+"_"+str(today.year)+".docx"])
                     
                     steps_done += 1    
                     my_bar.progress(int(steps_done*100/steps))
@@ -1043,8 +1045,8 @@ if User_validation():
                         font.name = 'Tahoma'
                     
                     # version=1
-                    name_word="Certificado_Reintegros_"+usuario+"_"+eleccion2+"_"+str(eleccion3)+".docx"
-                    name_pdf="Certificado_Reintegros_"+usuario+"_"+eleccion2+"_"+str(eleccion3)+".pdf"
+                    name_word=usuario+"_Certificado_Reintegros_"+eleccion2+"_"+str(eleccion3)+".docx"
+                    name_pdf=usuario+"_Certificado_Reintegros_"+eleccion2+"_"+str(eleccion3)+".pdf"
                     template_document.save(Ruta_x+name_word)
                     zf.write(Ruta_x+name_word)
                     if b:
@@ -1129,7 +1131,7 @@ if User_validation():
                 Users2=pd.unique(Fronteras["USUARIO"])
                 Users2= Users2[Users2 != "JULIA-RD"]
                 
-            if False:
+            if True:
                 Users = Users1
             else:
                 Users = np.intersect1d(Users1, Users2)
@@ -1154,9 +1156,6 @@ if User_validation():
             with columns_2[2]:
                 eleccion2=st.selectbox('Seleccione el mes del -',Opciones2)
             
-            columns_4 = st.columns([1,4,1])
-            with columns_4[1]:
-                eleccion4=st.number_input('Seleccione el último año incluido en las tablas',value=today.year)
             columns_5 = st.columns([1,10,1])
             Users_options=Users.copy()
             Users_options=np.append(["TODAS LAS OPCIONES"],Users_options)
@@ -1333,7 +1332,7 @@ if User_validation():
                      
                     variables = {
                         "${USUARIO}": usuario,
-                        "${EJECUTIVO}":Ejecutivo,
+                        "${EJECUTIVO}":any2str(Ejecutivo),
                         "${NUM_FRONTE}": str(Num_fronteras),
                         "${ENE_AGREGADA}": f'{Ene_agregada:,}',
                         "${CONTRATO}": Contrato,
@@ -1345,7 +1344,7 @@ if User_validation():
                         
                         
                     for variable_key, variable_value in variables.items():
-    
+
                         for section in template_document.sections:
                             for paragraph in section.header.paragraphs:
                                 
@@ -1480,25 +1479,45 @@ if User_validation():
                         
                         contador=0
                         for idx,val in enumerate(data_graph.index):
-                            if (int(data_graph["ACTUALIZACION"].values[idx].strftime("%Y")) >= eleccion4):
-                                rows[idx+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
-                                rows[idx+1].cells[1].text = any2str(data_graph["FRT DDV"].values[idx])
-                                rows[idx+1].cells[2].text = any2str(data_graph["COD SIC"].values[idx])
-                                rows[idx+1].cells[3].text = any2str(data_graph["PREDIO"].values[idx])
-                                rows[idx+1].cells[4].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
-                                rows[idx+1].cells[5].text = any2str(data_graph["MARGEN"].values[idx])
-                                rows[idx+1].cells[6].text = any2str(data_graph["ÚLTIMA DESCONEXION"].values[idx].strftime("%Y-%m-%d"))
-                                rows[idx+1].cells[7].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
-                                rows[idx+1].cells[8].text = any2str(data_graph["ACTUALIZACION"].values[idx].strftime("%Y-%m-%d"))
+                            if (int(data_graph["ACTUALIZACION"].values[idx].strftime("%Y")) >= 2018):
+                                rows[contador+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
+                                rows[contador+1].cells[1].text = any2str(data_graph["COD SIC"].values[idx])
+                                rows[contador+1].cells[2].text = any2str(data_graph["PREDIO"].values[idx])
+                                rows[contador+1].cells[3].text = any2str(data_graph["FRT DDV"].values[idx])
+                                rows[contador+1].cells[4].text = any2str(data_graph["TIPO DDV"].values[idx])
+                                rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
+                                rows[contador+1].cells[6].text = any2str(data_graph["ACTUALIZACION"].values[idx].strftime("%Y-%m-%d"))
+                                rows[contador+1].cells[7].text = any2str(data_graph["MARGEN"].values[idx])
+                                rows[contador+1].cells[8].text = any2str(data_graph["ÚLTIMA DESCONEXION"].values[idx].strftime("%Y-%m-%d"))
+                                rows[contador+1].cells[9].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
                                 try:
-                                    rows[idx+1].cells[9].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%Y-%m-%d"))
+                                    rows[contador+1].cells[10].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%Y-%m-%d"))
                                 except:
                                     
-                                    rows[idx+1].cells[9].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
-                                    
-        
+                                    rows[contador+1].cells[10].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
+
                                 for idx_2 in range(0,10):
-                                    set_font(rows,idx+1,idx_2,8)
+                                    set_font(rows,contador+1,idx_2,8)
+                                contador+=1
+                            else:
+                                rows[contador+1].cells[0].text = any2str(data_graph["FRONTERA COMERCIAL"].values[idx])
+                                rows[contador+1].cells[1].text = any2str(data_graph["COD SIC"].values[idx])
+                                rows[contador+1].cells[2].text = any2str(data_graph["PREDIO"].values[idx])
+                                rows[contador+1].cells[3].text = any2str(data_graph["FRT DDV"].values[idx])
+                                rows[contador+1].cells[4].text = any2str(data_graph["TIPO DDV"].values[idx])
+                                rows[contador+1].cells[5].text = any2str(f'{int(data_graph["PROMEDIO"].values[0]):,}')
+                                rows[contador+1].cells[6].text = "NO APLICA"
+                                rows[contador+1].cells[7].text = any2str(data_graph["MARGEN"].values[idx])
+                                rows[contador+1].cells[8].text = "NO APLICA"
+                                rows[contador+1].cells[9].text = any2str(str(data_graph["DÍAS CERTIFICADOS"].values[idx]))
+                                try:
+                                    rows[contador+1].cells[10].text = any2str(data_graph["PROXIMA PRUEBA DDV"].values[idx].strftime("%Y-%m-%d"))
+                                except:
+                                    
+                                    rows[contador+1].cells[10].text = str(data_graph["PROXIMA PRUEBA DDV"].values[idx])[:10]
+
+                                for idx_2 in range(0,10):
+                                    set_font(rows,contador+1,idx_2,8)
                                 contador+=1
                             
                         for idx in np.arange(0,200-contador+extra):
@@ -1517,8 +1536,8 @@ if User_validation():
                      
                         
     
-                    name_word="Proyecto_3_"+usuario+"_"+eleccion2+"_"+str(eleccion3)+".docx"
-                    name_pdf="Proyecto_3_"+usuario+"_"+eleccion2+"_"+str(eleccion3)+".pdf"
+                    name_word=usuario+"_Informe_Comercial_"+eleccion2+"_"+str(eleccion3)+".docx"
+                    name_pdf=usuario+"_Informe_Comercial_"+eleccion2+"_"+str(eleccion3)+".pdf"
                     template_document.save(Ruta_x+name_word)
                     zf.write(Ruta_x+name_word)
                     if b:
