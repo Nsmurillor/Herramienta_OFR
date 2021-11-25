@@ -1174,7 +1174,7 @@ if User_validation():
                     b=False
                 a=st.button("Crear los documentos")
                 
-            Ruta="Documentos/Proyecto_3/"+str(eleccion3) +"/"+ mes_num(eleccion2)+"-"+eleccion2 
+            Ruta="Documentos/Informe_Comercial/"+str(eleccion3) +"/"+ mes_num(eleccion2)+"-"+eleccion2 
             Ruta_x="Documentos_exportar"
             if os.path.exists(Ruta_x):
                 shutil.rmtree(Ruta_x)
