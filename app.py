@@ -1394,7 +1394,7 @@ if User_validation():
                                 plt.text(x = idx , y = data_graph.loc[value]["INGRESOS "+val] + Ingresos_gr.max()*0.05, s = num2money(data_graph.loc[value]["INGRESOS "+val]), size = 9,ha='center',va='center')
                                 
                         plt.gca().axes.get_yaxis().set_visible(False)
-                        plt.savefig(Ruta_img+"/"+name,dpi=80, bbox_inches='tight',transparent=True)
+                        plt.savefig(Ruta_img+"/"+name,dpi=150, bbox_inches='tight',transparent=True)
                         Imagenes_name.extend([Ruta_img+"/"+name])
                     
                     
@@ -1452,7 +1452,7 @@ if User_validation():
                                 plt.text(x = idx , y = value + max_val*0.05, s = f'{int(value):,}', size = 9,ha='center',va='center')
                                 
                         #plt.gca().axes.get_yaxis().set_visible(False)
-                        plt.savefig(Ruta_img+"/"+name,dpi=80, bbox_inches='tight',transparent=True)
+                        plt.savefig(Ruta_img+"/"+name,dpi=150, bbox_inches='tight',transparent=True)
                         Imagenes_name.extend([Ruta_img+"/"+name])
                         
                         
