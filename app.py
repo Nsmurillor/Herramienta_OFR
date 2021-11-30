@@ -1295,8 +1295,8 @@ if User_validation():
                         rows[6+contador].cells[3].text = f'{data_user["ENERGIA RESPALDADA "+val].values[0]:,}'
                         rows[7+contador].cells[3].text = "ENERGIA RESPALDADA "+val
                         for idx_2 in [0,2,3]:
-                            set_font(rows,6+contador,idx_2,8)
-                            set_font(rows,7+contador,idx_2,7)
+                            set_font(rows,6+contador,idx_2,10)
+                            set_font(rows,7+contador,idx_2,10)
                         contador += 3
                     cont_enter=0
                     for idx in np.arange(0,28-(6+contador)):
