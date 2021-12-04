@@ -435,14 +435,14 @@ st.set_page_config(
 	page_title="JULIA RD",  # String or None. Strings get appended with "• Streamlit". 
 	page_icon="📊",  # String, anything supported by st.image, or None.
 )
-if User_validation():
-    
+#if User_validation():
+if True:    
     
     Opciones1=("Oferta Firme de Respaldo","Certificado de Reintegros","Informe Comercial")
     eleccion=st.sidebar.selectbox('Seleccione el proyecto',Opciones1)
     
-    # if False:
-    if eleccion==Opciones1[0]:
+    if False:
+    #if eleccion==Opciones1[0]:
     
         st.header("Creación ofertas firmes de respaldo")
         st.subheader("Introducción de los documentos")
@@ -717,8 +717,8 @@ if User_validation():
                     
         else:
             st.warning("Necesita subir los tres archivos")   
-    #elif False:
-    elif eleccion==Opciones1[1]:
+    elif False:
+    #elif eleccion==Opciones1[1]:
         st.header("Creación certificados de reintegros")
         st.subheader("Introducción de los documentos")
         if True:
@@ -1078,11 +1078,11 @@ if User_validation():
                 
         else:
             st.warning("Necesita subir los tres archivos")   
-    #elif True:
-    elif eleccion==Opciones1[2]:
+    elif True:
+    #elif eleccion==Opciones1[2]:
         st.header("Creación consolidados mensuales")
         st.subheader("Introducción de los documentos")
-        if True:
+        if False:
             colums= st.columns([1,1])
             with colums[0]:                
                 uploaded_file_1 = st.file_uploader("Suba el documento de base principal")
@@ -1093,7 +1093,7 @@ if User_validation():
             
                 
         else:
-            uploaded_file_1="Excel_base.xlsx"
+            uploaded_file_1="Excel.xlsx"
             uploaded_file_2="Plantilla_base.docx"
             # uploaded_file_3="Excel_extra_certificados.xls"
             
@@ -1168,9 +1168,10 @@ if User_validation():
             
             with columns_3[1]:
                 if platform.system()=='Windows':
+                    DPI_IMGA=20
                     b=st.checkbox("PDF")
                 else:
-                    
+                    DPI_IMGA=150
                     b=False
                 a=st.button("Crear los documentos")
                 
@@ -1284,19 +1285,19 @@ if User_validation():
                     
                     contador=0
                     for idx,val in enumerate(Anos):
-                        rows[6+contador].cells[0].text = f'{data_user["INGRESO "+val].values[0]:,}'
-                        rows[7+contador].cells[0].text = "INGRESO "+val
+                        rows[3+contador].cells[0].text = f'{data_user["INGRESO "+val].values[0]:,}'
+                        rows[4+contador].cells[0].text = "INGRESO "+val
                         
                         
-                        rows[6+contador].cells[2].text = f'{data_user["DÍAS CERTIFICADOS "+val].values[0]:,}'
-                        rows[7+contador].cells[2].text = "DÍAS CERTIFICADOS "+val
+                        rows[3+contador].cells[2].text = f'{data_user["DÍAS CERTIFICADOS "+val].values[0]:,}'
+                        rows[4+contador].cells[2].text = "DÍAS CERTIFICADOS "+val
                         
                         
-                        rows[6+contador].cells[3].text = f'{data_user["ENERGIA RESPALDADA "+val].values[0]:,}'
-                        rows[7+contador].cells[3].text = "ENERGIA RESPALDADA "+val
+                        rows[3+contador].cells[3].text = f'{data_user["ENERGIA RESPALDADA "+val].values[0]:,}'
+                        rows[4+contador].cells[3].text = "ENERGIA RESPALDADA "+val
                         for idx_2 in [0,2,3]:
-                            set_font(rows,6+contador,idx_2,10)
-                            set_font(rows,7+contador,idx_2,10)
+                            set_font(rows,3+contador,idx_2,9)
+                            set_font(rows,4+contador,idx_2,9)
                         contador += 3
                     cont_enter=0
                     for idx in np.arange(0,28-(6+contador)):
@@ -1308,7 +1309,7 @@ if User_validation():
                         
                     if len(Anos) ==0:
                         st.warning("El usuario "+ usuario+" no tiene registros anuales" )
-                        Enter_final ="\n"*cont_enter
+                        Enter_final ="\n"*(cont_enter+3)
                         for paragraph in template_document.paragraphs:
                             replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
                     if len(Anos) > 2:
@@ -1332,6 +1333,8 @@ if User_validation():
                      
                     variables = {
                         "${USUARIO}": usuario,
+                        "${MES}": eleccion2.upper(),
+                        "${ANO}": str(eleccion3),
                         "${EJECUTIVO}":any2str(Ejecutivo),
                         "${NUM_FRONTE}": str(Num_fronteras),
                         "${ENE_AGREGADA}": f'{round(Ene_agregada):,}',
@@ -1394,7 +1397,7 @@ if User_validation():
                                 plt.text(x = idx , y = data_graph.loc[value]["INGRESOS "+val] + Ingresos_gr.max()*0.05, s = num2money(data_graph.loc[value]["INGRESOS "+val]), size = 9,ha='center',va='center')
                                 
                         plt.gca().axes.get_yaxis().set_visible(False)
-                        plt.savefig(Ruta_img+"/"+name,dpi=150, bbox_inches='tight',transparent=True)
+                        plt.savefig(Ruta_img+"/"+name,dpi=DPI_IMGA, bbox_inches='tight',transparent=True)
                         Imagenes_name.extend([Ruta_img+"/"+name])
                     
                     
@@ -1452,7 +1455,7 @@ if User_validation():
                                 plt.text(x = idx , y = value + max_val*0.05, s = f'{int(value):,}', size = 9,ha='center',va='center')
                                 
                         #plt.gca().axes.get_yaxis().set_visible(False)
-                        plt.savefig(Ruta_img+"/"+name,dpi=150, bbox_inches='tight',transparent=True)
+                        plt.savefig(Ruta_img+"/"+name,dpi=DPI_IMGA, bbox_inches='tight',transparent=True)
                         Imagenes_name.extend([Ruta_img+"/"+name])
                         
                         
@@ -1476,7 +1479,7 @@ if User_validation():
                     
     
     
-                        rows = template_document.tables[4].rows
+                        rows = template_document.tables[3].rows
                         
                         contador=0
                         for idx,val in enumerate(data_graph.index):
@@ -1531,13 +1534,13 @@ if User_validation():
                                     
                             
                         for idx in np.arange(0,200-contador+extra):
-                            remove_row(template_document.tables[4], rows[-1])   
+                            remove_row(template_document.tables[3], rows[-1])   
                         
                     else:
                         st.warning("El usuario "+usuario+" no se encuentra en la hoja de Fronteras")
                         rows = template_document.tables[4].rows
                         for idx in np.arange(0,201):
-                            remove_row(template_document.tables[4], rows[-1])
+                            remove_row(template_document.tables[3], rows[-1])
                             
                         for paragraph in template_document.paragraphs:
                             replace_text_in_paragraph(paragraph, "${IMGENES_3}", '')
