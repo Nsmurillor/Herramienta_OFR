@@ -227,7 +227,7 @@ def dt_fechas_2(data,data_user,Fechas,tipo_dia):
     return dt_Final
 
 def dt_fechas_3(data,data_user,Fechas,tipo_dia):
-    dt_Final=pd.DataFrame(columns=["Dia","Fecha","Respaldo","P_neto","TRM"])
+    dt_Final=pd.DataFrame(columns=["Dia","Fecha","Respaldo","P_neto","TRM","PRECIO PONDERADO"])
     for dia in Fechas:
         data_fecha=data_user[data_user["FECHA"]== dia]
         
@@ -237,8 +237,8 @@ def dt_fechas_3(data,data_user,Fechas,tipo_dia):
             st.warning("Actualizar el calendario del excel extra")
             d_week=day_week(pd.Series(data=dia).dt.dayofweek.to_numpy()[0])
         
-        df=pd.DataFrame([[d_week,dia,data_fecha["CANTIDAD"].sum(),data_fecha["P NETO"].sum(),round(data_fecha["TRM"].mean(),2)]],
-                        columns=["Dia","Fecha","Respaldo","P_neto","TRM"])
+        df=pd.DataFrame([[d_week,dia,data_fecha["CANTIDAD"].sum(),data_fecha["P NETO"].sum(),round(data_fecha["TRM"].mean(),2),round(data_fecha["PRECIO PONDERADO"].mean(),2)]],
+                        columns=["Dia","Fecha","Respaldo","P_neto","TRM","PRECIO PONDERADO"])
         dt_Final=dt_Final.append(df, ignore_index=True)
     
     return dt_Final
@@ -1704,7 +1704,7 @@ if User_validation():
                         rows[int(idx)+1].cells[1].text = Data_frame_fechas.iloc[idx]["Dia"]
                         
                         rows[int(idx)+1].cells[2].text = f'{Data_frame_fechas.iloc[idx]["Respaldo"]:,}'
-                        rows[int(idx)+1].cells[3].text = f'{round(Data_frame_fechas.iloc[idx]["P_neto"]/Data_frame_fechas.iloc[idx]["TRM"],2):,}'
+                        rows[int(idx)+1].cells[3].text = f'{Data_frame_fechas.iloc[idx]["PRECIO PONDERADO"]:,}'
                         rows[int(idx)+1].cells[4].text = f'{Data_frame_fechas.iloc[idx]["TRM"]:,}'
                         rows[int(idx)+1].cells[5].text = f'{Data_frame_fechas.iloc[idx]["P_neto"]:,}'
                         # Acum_Res += Data_frame_fechas.iloc[idx]["Respaldo"]
