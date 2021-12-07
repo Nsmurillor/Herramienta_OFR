@@ -1521,7 +1521,7 @@ if User_validation():
                             
 
                             for idx_3 in range(1,len(Meses_ano)):
-                                set_font(rows,idx_3,idx,8)
+                                set_font(rows,idx_3,idx+1,8)
                         
                         
                         for idx_ex in range(0,7-len(Anos)):
