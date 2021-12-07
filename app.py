@@ -226,6 +226,23 @@ def dt_fechas_2(data,data_user,Fechas,tipo_dia):
     
     return dt_Final
 
+def dt_fechas_3(data,data_user,Fechas,tipo_dia):
+    dt_Final=pd.DataFrame(columns=["Dia","Fecha","Respaldo","P_neto","TRM"])
+    for dia in Fechas:
+        data_fecha=data_user[data_user["FECHA"]== dia]
+        
+        try:
+            d_week=tipo_dia[Tipo_dia["FECHA"]==dia]["TIPO D"].to_numpy()[0]
+        except:
+            st.warning("Actualizar el calendario del excel extra")
+            d_week=day_week(pd.Series(data=dia).dt.dayofweek.to_numpy()[0])
+        
+        df=pd.DataFrame([[d_week,dia,data_fecha["CANTIDAD"].sum(),data_fecha["P NETO"].sum(),round(data_fecha["TRM"].mean(),2)]],
+                        columns=["Dia","Fecha","Respaldo","P_neto","TRM"])
+        dt_Final=dt_Final.append(df, ignore_index=True)
+    
+    return dt_Final
+
 def Mes_espa(mes):
     
     if mes =="01":
@@ -429,20 +446,34 @@ def replace_text_in_paragraph(paragraph, key, value):
             if key in item.text:
                 item.text = item.text.replace(key, value)
 
+def delete_columns(table, columns):
+    # sort columns descending
+    columns.sort(reverse=True)
+    
+    grid = table._tbl.find("w:tblGrid", table._tbl.nsmap)
+    for ci in columns:
+        for cell in table.column_cells(ci):
+            cell._tc.getparent().remove(cell._tc)
+
+        # Delete column reference.
+        col_elem = grid[ci]
+        grid.remove(col_elem)
+
 st.set_page_config(
 	layout="centered",  # Can be "centered" or "wide". In the future also "dashboard", etc.
 	initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
 	page_title="JULIA RD",  # String or None. Strings get appended with "• Streamlit". 
 	page_icon="📊",  # String, anything supported by st.image, or None.
 )
-#if User_validation():
-if True:    
+
+if User_validation():
+#if True:    
     
     Opciones1=("Oferta Firme de Respaldo","Certificado de Reintegros","Informe Comercial")
     eleccion=st.sidebar.selectbox('Seleccione el proyecto',Opciones1)
     
-    if False:
-    #if eleccion==Opciones1[0]:
+    #if False:
+    if eleccion==Opciones1[0]:
     
         st.header("Creación ofertas firmes de respaldo")
         st.subheader("Introducción de los documentos")
@@ -717,8 +748,8 @@ if True:
                     
         else:
             st.warning("Necesita subir los tres archivos")   
-    elif False:
-    #elif eleccion==Opciones1[1]:
+    #elif False:
+    elif eleccion==Opciones1[1]:
         st.header("Creación certificados de reintegros")
         st.subheader("Introducción de los documentos")
         if True:
@@ -1078,11 +1109,11 @@ if True:
                 
         else:
             st.warning("Necesita subir los tres archivos")   
-    elif True:
-    #elif eleccion==Opciones1[2]:
+    #elif True:
+    elif eleccion==Opciones1[2]:
         st.header("Creación consolidados mensuales")
         st.subheader("Introducción de los documentos")
-        if False:
+        if True:
             colums= st.columns([1,1])
             with colums[0]:                
                 uploaded_file_1 = st.file_uploader("Suba el documento de base principal")
@@ -1093,7 +1124,7 @@ if True:
             
                 
         else:
-            uploaded_file_1="Excel.xlsx"
+            uploaded_file_1="Excel_2.xlsx"
             uploaded_file_2="Plantilla_base.docx"
             # uploaded_file_3="Excel_extra_certificados.xls"
             
@@ -1105,8 +1136,10 @@ if True:
                 Usuarios=pd.read_excel(excel_1,"USUARIOS")
                 Year_list=[s for s in excel_1.sheet_names if "INGRESOS" in s]
                 Ingresos=pd.read_excel(excel_1,Year_list)
+                Tabla_3=pd.read_excel(excel_1,sheet_name="LIQUIDACION")
+                Tipo_dia=pd.read_excel(excel_1,sheet_name="CALENDARIO")
                 #Extras=pd.read_excel(uploaded_file_3,sheet_name="Usuarios")
-                #Tipo_dia=pd.read_excel(uploaded_file_3,sheet_name="Calendario")
+                
                 #Agentes=pd.read_excel(uploaded_file_3,sheet_name="Agentes")
             except:
                 st.warning("Recuerde que el formato del Excel tiene que ser xls")
@@ -1164,11 +1197,12 @@ if True:
         
             if not np.any(np.array(Users_eleccion)=="TODAS LAS OPCIONES"):
                 Users=Users_eleccion
+            
             columns_3 = st.columns([2,1,2])
             
             with columns_3[1]:
                 if platform.system()=='Windows':
-                    DPI_IMGA=20
+                    DPI_IMGA=150
                     b=st.checkbox("PDF")
                 else:
                     DPI_IMGA=150
@@ -1184,7 +1218,6 @@ if True:
             else:
                 Ruta_x=Ruta_x+"/"
             os.makedirs(Ruta_x, exist_ok=True)
-            
             if a:
                 try:
                     path1 = os.path.join(Ruta)
@@ -1306,29 +1339,41 @@ if True:
                         cont_enter += 1
                         
                         
-                        
-                    if len(Anos) ==0:
-                        st.warning("El usuario "+ usuario+" no tiene registros anuales" )
-                        Enter_final ="\n"*(cont_enter+3)
-                        for paragraph in template_document.paragraphs:
-                            replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
-                    if len(Anos) > 2:
+                    if False:    
+                        if len(Anos) ==0:
+                            st.warning("El usuario "+ usuario+" no tiene registros anuales" )
+                            Enter_final ="\n"*(cont_enter+3)
+                            for paragraph in template_document.paragraphs:
+                                replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
+                        if len(Anos) > 2:
+                            Enter_final="\n"*cont_enter
+                            
+
+
+                            for paragraph in template_document.paragraphs:
+                                replace_text_in_paragraph(paragraph, "${IMGENES_2}", '${IMA_INGRESOS}')
+                                if "${IMA_INGRESOS}" in  paragraph.text:
+                                    run = paragraph.add_run()
+                                    run.add_break(WD_BREAK.PAGE)
+                            
+                        elif len(Anos) == 1:
+                            Enter_final="\n"*int(cont_enter/4)+'${IMA_INGRESOS}'+"\n"*int(cont_enter/4)
+                            for paragraph in template_document.paragraphs:
+                                replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
+                        elif len(Anos) == 2:
+                            Enter_final='${IMA_INGRESOS}'
+                            for paragraph in template_document.paragraphs:
+                                replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
+                    else:
+                        if len(Anos) ==0:
+                            st.warning("El usuario "+ usuario+" no tiene registros anuales" )
+
+
+
                         Enter_final="\n"*cont_enter
-                        
                         for paragraph in template_document.paragraphs:
-                            replace_text_in_paragraph(paragraph, "${IMGENES_2}", '${IMA_INGRESOS}')
-                            if "${IMA_INGRESOS}" in  paragraph.text:
-                                run = paragraph.add_run()
-                                run.add_break(WD_BREAK.PAGE)
-                        
-                    elif len(Anos) == 1:
-                        Enter_final="\n"*int(cont_enter/4)+'${IMA_INGRESOS}'+"\n"*int(cont_enter/4)
-                        for paragraph in template_document.paragraphs:
-                            replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
-                    elif len(Anos) == 2:
-                        Enter_final='${IMA_INGRESOS}'
-                        for paragraph in template_document.paragraphs:
-                            replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
+                                replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
+
                         
                      
                     variables = {
@@ -1363,46 +1408,140 @@ if True:
                                     for paragraph in cell.paragraphs:
                                         replace_text_in_paragraph(paragraph, variable_key, variable_value)
                     Ruta_img="Imagenes"
+                    Meses=np.array(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"])
+                    
                     try:
                         pathx = os.path.join(Ruta_img)
                         shutil.rmtree(pathx)
                         os.makedirs(Ruta_img, exist_ok=True)
                     except:
                         os.makedirs(Ruta_img, exist_ok=True)
+                    
+                    Meses_ano=np.array(["FECHA","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"])
+                    
+                    dt_Final=pd.DataFrame(columns=Meses_ano)
+                    
+                        
+                        
+                    
                     Imagenes_name=[]
                     color_b = [(0.94,0.49,0.15,1),(0.9,0.13,0.28,1),(0.61,0.61,0.61,1)]
-                    Meses=np.array(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"])
+                    
+                    
                     for idx,val in enumerate(Anos):
+                        
+                        
                         name="INGRESOS "+val+".png"
                         data_graph=Ingresos["INGRESOS "+val][Ingresos["INGRESOS "+val]["USUARIO"]==usuario]
                         data_graph= data_graph.dropna(how='all', axis=1)
                         data_graph['MES'] = Meses[data_graph['FECHA'].dt.month-1]
                         if len(data_graph['MES'].unique()) != len(data_graph['MES']):
                             st.warning("Mes repetido revisar "+ "INGRESOS "+val+ " para el usuario "+ usuario)
-                            
-                        fig = plt.figure(figsize=(9, 3.38))
-                        ax = fig.add_axes([0,0,1,1])
                         Meses_gr = data_graph['MES']
-                        Ingresos_gr = data_graph["INGRESOS "+val]
-                        ax.bar(Meses_gr,Ingresos_gr,color=color_b[idx % 3])
-                        plt.xlabel("")
-                        plt.ylabel("Energía  [COP]")
-                        plt.title("INGRESOS "+val)
-                        max_val=Ingresos_gr.max()
-                        if len(data_graph['MES'])>10:
-                            plt.xticks(rotation=90)
-                        plt.ylim((0,max_val*1.2))
+                        if False: 
+                            fig = plt.figure(figsize=(9, 3.38))
+                            ax = fig.add_axes([0,0,1,1])
+                            
+                            Ingresos_gr = data_graph["INGRESOS "+val]
+                            ax.bar(Meses_gr,Ingresos_gr,color=color_b[idx % 3])
+                            plt.xlabel("")
+                            plt.ylabel("Energía  [COP]")
+                            plt.title("INGRESOS "+val)
+                            max_val=Ingresos_gr.max()
+                            if len(data_graph['MES'])>10:
+                                plt.xticks(rotation=90)
+                            plt.ylim((0,max_val*1.2))
+                            
+                            for idx,value in enumerate(list(data_graph.index)):
+                                    plt.text(x = idx , y = data_graph.loc[value]["INGRESOS "+val] + Ingresos_gr.max()*0.05, s = num2money(data_graph.loc[value]["INGRESOS "+val]), size = 9,ha='center',va='center')
+                                    
+                            plt.gca().axes.get_yaxis().set_visible(False)
+                            plt.savefig(Ruta_img+"/"+name,dpi=DPI_IMGA, bbox_inches='tight',transparent=True)
+                            Imagenes_name.extend([Ruta_img+"/"+name])
+
+                        list_1=[val]
+
+                        for idx4 in Meses:
                         
-                        for idx,value in enumerate(list(data_graph.index)):
-                                plt.text(x = idx , y = data_graph.loc[value]["INGRESOS "+val] + Ingresos_gr.max()*0.05, s = num2money(data_graph.loc[value]["INGRESOS "+val]), size = 9,ha='center',va='center')
+                            if idx4 in list(Meses_gr):
+                                list_1.append(data_graph["INGRESOS "+val][data_graph['MES']==idx4].iloc[0])
+                            else:
+                                list_1.append(0)
+                              
                                 
-                        plt.gca().axes.get_yaxis().set_visible(False)
-                        plt.savefig(Ruta_img+"/"+name,dpi=DPI_IMGA, bbox_inches='tight',transparent=True)
-                        Imagenes_name.extend([Ruta_img+"/"+name])
+                                
+                        df=pd.DataFrame([list_1],columns=Meses_ano)
+                        dt_Final=dt_Final.append(df, ignore_index=True)
                     
-                    
-                    
-                    
+                    try:
+                        Promedio=int(dt_Final[Meses][dt_Final[Meses]>0].mean().mean())
+                        bool_1=True
+
+                    except:
+                        bool_1=False
+
+                    if bool_1:
+                        if Promedio<1e3:
+                            div=1e0
+                            nomina=""
+                        elif Promedio<1e6:
+                            div=1e3
+                            nomina="miles de"
+                        elif Promedio<1e9:
+                            div=1e6
+                            nomina="millones de"
+                        elif Promedio<1e12:
+                            div=1e9
+                            nomina="miles de millones de"
+                        elif Promedio<1e15:
+                            div=1e12
+                            nomina="billones de"
+                                
+                        
+                        rows = template_document.tables[1].rows
+                        index_1=dt_Final.index.values
+                        contad_enter_3=0
+                        for idx in index_1:
+                            rows[0].cells[int(idx)+1].text=dt_Final["FECHA"].iloc[idx]
+                            for idx_2,val in enumerate(Meses):
+                                num=round(dt_Final[val].iloc[idx]/div,2)
+                                if num > 0:
+                                    
+                                    rows[idx_2+1].cells[int(idx)+1].text=f'{num:,}'
+                                elif num == 0:
+                                    rows[idx_2+1].cells[int(idx)+1].text="-"
+
+                            
+
+                            run=rows[0].cells[idx+1].paragraphs[0].runs
+                            font = run[0].font
+                            font.size= Pt(10)
+                            font.name = 'Tahoma'
+                            font.bold = True
+                            
+
+                            for idx_3 in range(1,len(Meses_ano)):
+                                set_font(rows,idx_3,idx,8)
+                        
+                        
+                        for idx_ex in range(0,7-len(Anos)):
+                            delete_columns(template_document.tables[1], [7-idx_ex])   
+            
+
+                            
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${TITULO_TAB_1}", "HISTORICO REINTEGRO DDV")    
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${DENOMINACION}", "Los valores de la tabla están en "+nomina+" COP")    
+                    else:
+                        rows = template_document.tables[1].rows
+                        for idx_ex in range(0,13):
+                            remove_row(template_document.tables[1], rows[-1])
+                        
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${TITULO_TAB_1}", "")    
+                        for paragraph in template_document.paragraphs:
+                            replace_text_in_paragraph(paragraph, "${DENOMINACION}", "") 
                     
                     
                     Var_imagenes = {
@@ -1538,15 +1677,74 @@ if True:
                         
                     else:
                         st.warning("El usuario "+usuario+" no se encuentra en la hoja de Fronteras")
-                        rows = template_document.tables[4].rows
+                        rows = template_document.tables[3].rows
                         for idx in np.arange(0,201):
                             remove_row(template_document.tables[3], rows[-1])
                             
                         for paragraph in template_document.paragraphs:
                             replace_text_in_paragraph(paragraph, "${IMGENES_3}", '')
                         
+                        
+                    data_user_t3=Tabla_3.copy()
+                    data_user_t3=data_user_t3[data_user_t3["USUARIO"]==usuario] 
+                
+                    Fechas_t3 = pd.unique(data_user_t3["FECHA"])
+                
+                
+                    Data_frame_fechas=dt_fechas_3(Tabla_3.copy(),data_user_t3,Fechas_t3 ,Tipo_dia)
+                
                     
-                     
+                    rows = template_document.tables[2].rows
+                    index_1=Data_frame_fechas.index.values
+                    contad_enter_3=0
+                    for idx in index_1:
+    
+                        rows[int(idx)+1].cells[0].text = Data_frame_fechas.iloc[idx]["Fecha"].strftime('%Y-%m-%d')
+                        
+                        rows[int(idx)+1].cells[1].text = Data_frame_fechas.iloc[idx]["Dia"]
+                        
+                        rows[int(idx)+1].cells[2].text = f'{Data_frame_fechas.iloc[idx]["Respaldo"]:,}'
+                        rows[int(idx)+1].cells[3].text = f'{round(Data_frame_fechas.iloc[idx]["P_neto"]/Data_frame_fechas.iloc[idx]["TRM"],2):,}'
+                        rows[int(idx)+1].cells[4].text = f'{Data_frame_fechas.iloc[idx]["TRM"]:,}'
+                        rows[int(idx)+1].cells[5].text = f'{Data_frame_fechas.iloc[idx]["P_neto"]:,}'
+                        # Acum_Res += Data_frame_fechas.iloc[idx]["Respaldo"]
+                        
+                        for idx_2 in [0,1,2,4,5]:
+                            run=rows[int(idx)+1].cells[idx_2].paragraphs[0].runs
+                            font = run[0].font
+                            font.size= Pt(10)
+                            font.name = 'Tahoma'
+                        
+                        
+                    for idx in np.arange(len(index_1)+1,32):
+                        
+                        remove_row(template_document.tables[2], rows[len(index_1)+1])    
+                        contad_enter_3+=1
+                        
+                    if len(index_1) > 0:
+                        for paragraph in template_document.paragraphs:
+                                replace_text_in_paragraph(paragraph, "${TITULO_TAB_2}", "REINTEGRO MECANISMO DDV "+eleccion2.upper()+" "+str(eleccion3))
+                        for paragraph in template_document.paragraphs:
+                                replace_text_in_paragraph(paragraph, "${ENTER_3}", '\n'*contad_enter_3)
+
+                    elif len(index_1)==0:
+                        st.warning("El usuario "+usuario+" no cuenta con registros en la hoja de liquidación")
+                        for key in ["${ENTER_3}","${TITULO_TAB_2}"]:
+                            for paragraph in template_document.paragraphs:
+                                replace_text_in_paragraph(paragraph, key, "")
+                                                    
+                        remove_row(template_document.tables[2], rows[-1])    
+                        
+                                
+                    #rows[-1].cells[1].text = Num_dias(len(Fechas))
+                    # rows[-1].cells[2].text = f'{Acum_Req:,}'
+                    # rows[-1].cells[3].text = f'{Acum_Res:,}'
+                    
+                    # for idx_2 in range(1,4):
+                    #     run=rows[-1].cells[idx_2].paragraphs[0].runs
+                    #     font = run[0].font
+                    #     font.size= Pt(10)
+                    #     font.name = 'Tahoma' 
                         
     
                     name_word=usuario+"_Informe_Comercial_"+eleccion2+"_"+str(eleccion3)+".docx"
