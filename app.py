@@ -1124,7 +1124,7 @@ if User_validation():
             
                 
         else:
-            uploaded_file_1="Excel_2.xlsx"
+            uploaded_file_1="Excel_base_informe.xls"
             uploaded_file_2="Plantilla_base.docx"
             # uploaded_file_3="Excel_extra_certificados.xls"
             
@@ -1185,9 +1185,9 @@ if User_validation():
             Opciones2=("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
             
             with columns_2[1]:
-                eleccion3=st.number_input('Seleccione el año del -',value=today.year)
+                eleccion3=st.number_input('Seleccione el año del Informe Comercial',value=today.year)
             with columns_2[2]:
-                eleccion2=st.selectbox('Seleccione el mes del -',Opciones2)
+                eleccion2=st.selectbox('Seleccione el mes del Informe Comercial',Opciones2)
             
             columns_5 = st.columns([1,10,1])
             Users_options=Users.copy()
@@ -1330,7 +1330,12 @@ if User_validation():
                         rows[4+contador].cells[3].text = "ENERGIA RESPALDADA "+val
                         for idx_2 in [0,2,3]:
                             set_font(rows,3+contador,idx_2,9)
-                            set_font(rows,4+contador,idx_2,9)
+                            run=rows[4+contador].cells[idx_2].paragraphs[0].runs
+                            font = run[0].font
+                            font.size= Pt(8.5)
+                            font.name = 'Tahoma'
+                            font.bold = True
+
                         contador += 3
                     cont_enter=0
                     for idx in np.arange(0,28-(6+contador)):
@@ -1368,9 +1373,15 @@ if User_validation():
                         if len(Anos) ==0:
                             st.warning("El usuario "+ usuario+" no tiene registros anuales" )
 
-
-
-                        Enter_final="\n"*cont_enter
+                        # st.write(usuario)
+                        # st.write(cont_enter)
+                        # st.write(int(cont_enter/2))
+                        if cont_enter%2==0:
+                            Enter_final_1="\n"*int(cont_enter/2-1)
+                            Enter_final_2="\n"*int(cont_enter/2)
+                        else:
+                            Enter_final_1="\n"*int(cont_enter/2)
+                            Enter_final_2="\n"*int(cont_enter/2)
                         for paragraph in template_document.paragraphs:
                                 replace_text_in_paragraph(paragraph, "${IMGENES_2}", '')
 
@@ -1386,7 +1397,8 @@ if User_validation():
                         "${CONTRATO}": Contrato,
                         "${VEN_CONTRATO}": Ven_contrato,
                         "${PUNTO_FOC}":Extra_1,
-                        "${ENTER}":Enter_final
+                        "${ENTER_1}":Enter_final_1,
+                        "${ENTER_2}":Enter_final_2
                     }
                     
                         
