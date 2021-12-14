@@ -977,9 +977,9 @@ if User_validation():
                         
                         Respaldo=data_user[data_user["OFR"]==Agentes.iloc[idx]["OFR"]]["CANTIDAD"].sum()
                         
-                        rows[int(idx)+13].cells[0].text = "Respaldo "+Agentes.iloc[idx]["AGENTE"]
-                        rows[int(idx)+13].cells[1].text = "kWh"
-                        rows[int(idx)+13].cells[2].text = f'{Respaldo:,}'
+                        rows[int(idx)+15].cells[0].text = "Respaldo "+Agentes.iloc[idx]["AGENTE"]
+                        rows[int(idx)+15].cells[1].text = "kWh"
+                        rows[int(idx)+15].cells[2].text = f'{Respaldo:,}'
                         
                         
                         for idx_2 in range(0,3):
@@ -989,7 +989,7 @@ if User_validation():
                             font.name = 'Tahoma'
                         
                         for idx_2 in range(0,3):
-                            run=rows[int(idx)+13].cells[idx_2].paragraphs[0].runs
+                            run=rows[int(idx)+15].cells[idx_2].paragraphs[0].runs
                             font = run[0].font
                             font.size= Pt(10)
                             font.name = 'Tahoma'
@@ -999,7 +999,7 @@ if User_validation():
                         
                         Total_respaldo += Respaldo
                         
-                        df=pd.DataFrame([[Agentes.iloc[idx]["OFR"],Respaldo,int(idx)+3,int(idx)+13]],columns=["OFR","INGRESO","FILA_1","FILA_2"])
+                        df=pd.DataFrame([[Agentes.iloc[idx]["OFR"],Respaldo,int(idx)+3,int(idx)+15]],columns=["OFR","INGRESO","FILA_1","FILA_2"])
                         dt_participa=dt_participa.append(df, ignore_index=True)
                         
                         Total_ingreso += Respaldo*float(re.sub(",","",P_TMR))*Agentes.iloc[idx]["PRECIO"]/1000
