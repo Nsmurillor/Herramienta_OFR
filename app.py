@@ -1007,7 +1007,7 @@ if User_validation():
                         
                    
                     
-                    filas=[18,20,21,22,24]
+                    filas=[22,24,25,26,28]
                     valores=[Total_respaldo,
                              Total_ingreso,
                              Total_ingreso*Porc_come,
